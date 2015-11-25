@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Web;
 using System.Text;
 using System.Web.Mvc;
 using System.Web.Routing;
@@ -14,7 +13,7 @@ namespace BrnShop.Web.Controllers
     /// <summary>
     /// 账号控制器类
     /// </summary>
-    public partial class AccountController : BaseWebController
+    public class AccountController : BaseWebController
     {
         /// <summary>
         /// 登录
@@ -35,24 +34,26 @@ namespace BrnShop.Web.Controllers
             //get请求
             if (WebHelper.IsGet())
             {
-                LoginModel model = new LoginModel();
+                var model = new LoginModel
+                {
+                    ReturnUrl = returnUrl,
+                    ShadowName = WorkContext.ShopConfig.ShadowName,
+                    IsRemember = WorkContext.ShopConfig.IsRemember == 1,
+                    IsVerifyCode = CommonHelper.IsInArray(WorkContext.PageKey, WorkContext.ShopConfig.VerifyPages),
+                    OAuthPluginList = Plugins.GetOAuthPluginList()
+                };
 
-                model.ReturnUrl = returnUrl;
-                model.ShadowName = WorkContext.ShopConfig.ShadowName;
-                model.IsRemember = WorkContext.ShopConfig.IsRemember == 1;
-                model.IsVerifyCode = CommonHelper.IsInArray(WorkContext.PageKey, WorkContext.ShopConfig.VerifyPages);
-                model.OAuthPluginList = Plugins.GetOAuthPluginList();
 
                 return View(model);
             }
 
             //ajax请求
-            string accountName = WebHelper.GetFormString(WorkContext.ShopConfig.ShadowName);
-            string password = WebHelper.GetFormString("password");
-            string verifyCode = WebHelper.GetFormString("verifyCode");
-            int isRemember = WebHelper.GetFormInt("isRemember");
+            var accountName = WebHelper.GetFormString(WorkContext.ShopConfig.ShadowName);
+            var password = WebHelper.GetFormString("password");
+            var verifyCode = WebHelper.GetFormString("verifyCode");
+            var isRemember = WebHelper.GetFormInt("isRemember");
 
-            StringBuilder errorList = new StringBuilder("[");
+            var errorList = new StringBuilder("[");
             //验证账户名
             if (string.IsNullOrWhiteSpace(accountName))
             {
@@ -123,23 +124,23 @@ namespace BrnShop.Web.Controllers
             {
                 return AjaxResult("error", errorList.Remove(errorList.Length - 1, 1).Append("]").ToString(), true);
             }
-            else//验证成功时
-            {
-                //当用户等级是禁止访问等级时
-                if (partUserInfo.UserRid == 1)
-                    return AjaxResult("lockuser", "您的账号当前被锁定,不能访问");
+            //当用户等级是禁止访问等级时
+            if (partUserInfo != null && partUserInfo.UserRid == 1)
+                return AjaxResult("lockuser", "您的账号当前被锁定,不能访问");
 
-                //删除登陆失败日志
-                LoginFailLogs.DeleteLoginFailLogByIP(WorkContext.IP);
-                //更新用户最后访问
+            //删除登陆失败日志
+            LoginFailLogs.DeleteLoginFailLogByIP(WorkContext.IP);
+            //更新用户最后访问
+            if (partUserInfo != null)
+            {
                 Users.UpdateUserLastVisit(partUserInfo.Uid, DateTime.Now, WorkContext.IP, WorkContext.RegionId);
                 //更新购物车中用户id
                 Carts.UpdateCartUidBySid(partUserInfo.Uid, WorkContext.Sid);
                 //将用户信息写入cookie中
                 ShopUtils.SetUserCookie(partUserInfo, (WorkContext.ShopConfig.IsRemember == 1 && isRemember == 1) ? 30 : -1);
-
-                return AjaxResult("success", "登录成功");
             }
+
+            return AjaxResult("success", "登录成功");
         }
 
         /// <summary>
@@ -157,7 +158,7 @@ namespace BrnShop.Web.Controllers
                 return PromptView(returnUrl, "你已经是本商城的注册用户，无需再注册!");
             if (WorkContext.ShopConfig.RegTimeSpan > 0)
             {
-                DateTime registerTime = Users.GetRegisterTimeByRegisterIP(WorkContext.IP);
+                var registerTime = Users.GetRegisterTimeByRegisterIP(WorkContext.IP);
                 if ((DateTime.Now - registerTime).Minutes <= WorkContext.ShopConfig.RegTimeSpan)
                     return PromptView(returnUrl, "你注册太频繁，请间隔一定时间后再注册!");
             }
@@ -165,22 +166,24 @@ namespace BrnShop.Web.Controllers
             //get请求
             if (WebHelper.IsGet())
             {
-                RegisterModel model = new RegisterModel();
+                var model = new RegisterModel
+                {
+                    ReturnUrl = returnUrl,
+                    ShadowName = WorkContext.ShopConfig.ShadowName,
+                    IsVerifyCode = CommonHelper.IsInArray(WorkContext.PageKey, WorkContext.ShopConfig.VerifyPages)
+                };
 
-                model.ReturnUrl = returnUrl;
-                model.ShadowName = WorkContext.ShopConfig.ShadowName;
-                model.IsVerifyCode = CommonHelper.IsInArray(WorkContext.PageKey, WorkContext.ShopConfig.VerifyPages);
 
                 return View(model);
             }
 
             //ajax请求
-            string accountName = WebHelper.GetFormString(WorkContext.ShopConfig.ShadowName).Trim().ToLower();
-            string password = WebHelper.GetFormString("password");
-            string confirmPwd = WebHelper.GetFormString("confirmPwd");
-            string verifyCode = WebHelper.GetFormString("verifyCode");
+            var accountName = WebHelper.GetFormString(WorkContext.ShopConfig.ShadowName).Trim().ToLower();
+            var password = WebHelper.GetFormString("password");
+            var confirmPwd = WebHelper.GetFormString("confirmPwd");
+            var verifyCode = WebHelper.GetFormString("verifyCode");
 
-            StringBuilder errorList = new StringBuilder("[");
+            var errorList = new StringBuilder("[");
             #region 验证
 
             //账号验证
@@ -249,11 +252,11 @@ namespace BrnShop.Web.Controllers
             }
 
             //其它验证
-            int gender = WebHelper.GetFormInt("gender");
+            var gender = WebHelper.GetFormInt("gender");
             if (gender < 0 || gender > 2)
                 errorList.AppendFormat("{0}\"key\":\"{1}\",\"msg\":\"{2}\"{3},", "{", "gender", "请选择正确的性别", "}");
 
-            string nickName = WebHelper.GetFormString("nickName");
+            var nickName = WebHelper.GetFormString("nickName");
             if (nickName.Length > 10)
             {
                 errorList.AppendFormat("{0}\"key\":\"{1}\",\"msg\":\"{2}\"{3},", "{", "nickName", "昵称的长度不能大于10", "}");
@@ -268,13 +271,13 @@ namespace BrnShop.Web.Controllers
                 errorList.AppendFormat("{0}\"key\":\"{1}\",\"msg\":\"{2}\"{3},", "{", "realName", "真实姓名的长度不能大于5", "}");
             }
 
-            string bday = WebHelper.GetFormString("bday");
+            var bday = WebHelper.GetFormString("bday");
             if (bday.Length == 0)
             {
-                string bdayY = WebHelper.GetFormString("bdayY");
-                string bdayM = WebHelper.GetFormString("bdayM");
-                string bdayD = WebHelper.GetFormString("bdayD");
-                bday = string.Format("{0}-{1}-{2}", bdayY, bdayM, bdayD);
+                var bdayY = WebHelper.GetFormString("bdayY");
+                var bdayM = WebHelper.GetFormString("bdayM");
+                var bdayD = WebHelper.GetFormString("bdayD");
+                bday = $"{bdayY}-{bdayM}-{bdayD}";
             }
             if (bday.Length > 0 && bday != "--" && !ValidateHelper.IsDate(bday))
                 errorList.AppendFormat("{0}\"key\":\"{1}\",\"msg\":\"{2}\"{3},", "{", "bday", "请选择正确的日期", "}");
@@ -285,7 +288,7 @@ namespace BrnShop.Web.Controllers
                 errorList.AppendFormat("{0}\"key\":\"{1}\",\"msg\":\"{2}\"{3},", "{", "idCard", "请输入正确的身份证号", "}");
             }
 
-            int regionId = WebHelper.GetFormInt("regionId");
+            var regionId = WebHelper.GetFormInt("regionId");
             if (regionId > 0)
             {
                 if (Regions.GetRegionById(regionId) == null)
@@ -307,7 +310,7 @@ namespace BrnShop.Web.Controllers
             {
                 if (WorkContext.ShopConfig.RegType.Contains("2") && ValidateHelper.IsEmail(accountName))//验证邮箱
                 {
-                    string emailProvider = CommonHelper.GetEmailProvider(accountName);
+                    var emailProvider = CommonHelper.GetEmailProvider(accountName);
                     if (WorkContext.ShopConfig.AllowEmailProvider.Length != 0 && (!CommonHelper.IsInArray(emailProvider, WorkContext.ShopConfig.AllowEmailProvider, "\n")))
                     {
                         errorList.AppendFormat("{0}\"key\":\"{1}\",\"msg\":\"{2}\"{3},", "{", "accountName", "不能使用'" + emailProvider + "'类型的邮箱", "}");
@@ -336,10 +339,12 @@ namespace BrnShop.Web.Controllers
                     }
                     else
                     {
-                        userInfo = new UserInfo();
-                        userInfo.UserName = string.Empty;
-                        userInfo.Email = string.Empty;
-                        userInfo.Mobile = accountName;
+                        userInfo = new UserInfo
+                        {
+                            UserName = string.Empty,
+                            Email = string.Empty,
+                            Mobile = accountName
+                        };
                     }
                 }
                 else if (WorkContext.ShopConfig.RegType.Contains("1"))//验证用户名
@@ -350,10 +355,12 @@ namespace BrnShop.Web.Controllers
                     }
                     else
                     {
-                        userInfo = new UserInfo();
-                        userInfo.UserName = accountName;
-                        userInfo.Email = string.Empty;
-                        userInfo.Mobile = string.Empty;
+                        userInfo = new UserInfo
+                        {
+                            UserName = accountName,
+                            Email = string.Empty,
+                            Mobile = string.Empty
+                        };
                     }
                 }
             }
@@ -368,66 +375,69 @@ namespace BrnShop.Web.Controllers
             {
                 #region 绑定用户信息
 
-                userInfo.Salt = Randoms.CreateRandomValue(6);
-                userInfo.Password = Users.CreateUserPassword(password, userInfo.Salt);
-                userInfo.UserRid = UserRanks.GetLowestUserRank().UserRid;
-                userInfo.AdminGid = 1;//非管理员组
-                if (nickName.Length > 0)
-                    userInfo.NickName = WebHelper.HtmlEncode(nickName);
-                else
-                    userInfo.NickName = "bsp" + Randoms.CreateRandomValue(7);
-                userInfo.Avatar = "";
-                userInfo.PayCredits = 0;
-                userInfo.RankCredits = 0;
-                userInfo.VerifyEmail = 0;
-                userInfo.VerifyMobile = 0;
-
-                userInfo.LastVisitIP = WorkContext.IP;
-                userInfo.LastVisitRgId = WorkContext.RegionId;
-                userInfo.LastVisitTime = DateTime.Now;
-                userInfo.RegisterIP = WorkContext.IP;
-                userInfo.RegisterRgId = WorkContext.RegionId;
-                userInfo.RegisterTime = DateTime.Now;
-
-                userInfo.Gender = WebHelper.GetFormInt("gender");
-                userInfo.RealName = WebHelper.HtmlEncode(WebHelper.GetFormString("realName"));
-                userInfo.Bday = bday.Length > 0 ? TypeHelper.StringToDateTime(bday) : new DateTime(1900, 1, 1);
-                userInfo.IdCard = WebHelper.GetFormString("idCard");
-                userInfo.RegionId = WebHelper.GetFormInt("regionId");
-                userInfo.Address = WebHelper.HtmlEncode(WebHelper.GetFormString("address"));
-                userInfo.Bio = WebHelper.HtmlEncode(WebHelper.GetFormString("bio"));
-
-                #endregion
-
-                //创建用户
-                userInfo.Uid = Users.CreateUser(userInfo);
-
-                //添加用户失败
-                if (userInfo.Uid < 1)
-                    return AjaxResult("exception", "创建用户失败,请联系管理员");
-
-                //发放注册积分
-                Credits.SendRegisterCredits(ref userInfo, DateTime.Now);
-                //更新购物车中用户id
-                Carts.UpdateCartUidBySid(userInfo.Uid, WorkContext.Sid);
-                //将用户信息写入cookie
-                ShopUtils.SetUserCookie(userInfo, 0);
-
-                //发送注册欢迎信息
-                if (WorkContext.ShopConfig.IsWebcomeMsg == 1)
+                if (userInfo != null)
                 {
-                    if (userInfo.Email.Length > 0)
-                        Emails.SendWebcomeEmail(userInfo.Email);
-                    if (userInfo.Mobile.Length > 0)
-                        SMSes.SendWebcomeSMS(userInfo.Mobile);
-                }
+                    userInfo.Salt = Randoms.CreateRandomValue(6);
+                    userInfo.Password = Users.CreateUserPassword(password, userInfo.Salt);
+                    userInfo.UserRid = UserRanks.GetLowestUserRank().UserRid;
+                    userInfo.AdminGid = 1;//非管理员组
+                    if (nickName.Length > 0)
+                        userInfo.NickName = WebHelper.HtmlEncode(nickName);
+                    else
+                        userInfo.NickName = "bsp" + Randoms.CreateRandomValue(7);
+                    userInfo.Avatar = "";
+                    userInfo.PayCredits = 0;
+                    userInfo.RankCredits = 0;
+                    userInfo.VerifyEmail = 0;
+                    userInfo.VerifyMobile = 0;
 
-                //同步上下午
-                WorkContext.Uid = userInfo.Uid;
-                WorkContext.UserName = userInfo.UserName;
-                WorkContext.UserEmail = userInfo.Email;
-                WorkContext.UserMobile = userInfo.Mobile;
-                WorkContext.NickName = userInfo.NickName;
+                    userInfo.LastVisitIP = WorkContext.IP;
+                    userInfo.LastVisitRgId = WorkContext.RegionId;
+                    userInfo.LastVisitTime = DateTime.Now;
+                    userInfo.RegisterIP = WorkContext.IP;
+                    userInfo.RegisterRgId = WorkContext.RegionId;
+                    userInfo.RegisterTime = DateTime.Now;
+
+                    userInfo.Gender = WebHelper.GetFormInt("gender");
+                    userInfo.RealName = WebHelper.HtmlEncode(WebHelper.GetFormString("realName"));
+                    userInfo.Bday = bday.Length > 0 ? TypeHelper.StringToDateTime(bday) : new DateTime(1900, 1, 1);
+                    userInfo.IdCard = WebHelper.GetFormString("idCard");
+                    userInfo.RegionId = WebHelper.GetFormInt("regionId");
+                    userInfo.Address = WebHelper.HtmlEncode(WebHelper.GetFormString("address"));
+                    userInfo.Bio = WebHelper.HtmlEncode(WebHelper.GetFormString("bio"));
+
+                    #endregion
+
+                    //创建用户
+                    userInfo.Uid = Users.CreateUser(userInfo);
+
+                    //添加用户失败
+                    if (userInfo.Uid < 1)
+                        return AjaxResult("exception", "创建用户失败,请联系管理员");
+
+                    //发放注册积分
+                    Credits.SendRegisterCredits(ref userInfo, DateTime.Now);
+                    //更新购物车中用户id
+                    Carts.UpdateCartUidBySid(userInfo.Uid, WorkContext.Sid);
+                    //将用户信息写入cookie
+                    ShopUtils.SetUserCookie(userInfo, 0);
+
+                    //发送注册欢迎信息
+                    if (WorkContext.ShopConfig.IsWebcomeMsg == 1)
+                    {
+                        if (userInfo.Email.Length > 0)
+                            Emails.SendWebcomeEmail(userInfo.Email);
+                        if (userInfo.Mobile.Length > 0)
+                            SMSes.SendWebcomeSMS(userInfo.Mobile);
+                    }
+
+                    //同步上下午
+                    WorkContext.Uid = userInfo.Uid;
+                    WorkContext.UserName = userInfo.UserName;
+                    WorkContext.UserEmail = userInfo.Email;
+                    WorkContext.UserMobile = userInfo.Mobile;
+                    WorkContext.NickName = userInfo.NickName;
+                }
 
                 return AjaxResult("success", "注册成功");
             }
@@ -455,19 +465,21 @@ namespace BrnShop.Web.Controllers
             //get请求
             if (WebHelper.IsGet())
             {
-                FindPwdModel model = new FindPwdModel();
+                var model = new FindPwdModel
+                {
+                    ShadowName = WorkContext.ShopConfig.ShadowName,
+                    IsVerifyCode = CommonHelper.IsInArray(WorkContext.PageKey, WorkContext.ShopConfig.VerifyPages)
+                };
 
-                model.ShadowName = WorkContext.ShopConfig.ShadowName;
-                model.IsVerifyCode = CommonHelper.IsInArray(WorkContext.PageKey, WorkContext.ShopConfig.VerifyPages);
 
                 return View(model);
             }
 
             //ajax请求
-            string accountName = WebHelper.GetFormString(WorkContext.ShopConfig.ShadowName);
-            string verifyCode = WebHelper.GetFormString("verifyCode");
+            var accountName = WebHelper.GetFormString(WorkContext.ShopConfig.ShadowName);
+            var verifyCode = WebHelper.GetFormString("verifyCode");
 
-            StringBuilder errorList = new StringBuilder("[");
+            var errorList = new StringBuilder("[");
             //账号验证
             if (string.IsNullOrWhiteSpace(accountName))
             {
@@ -521,7 +533,7 @@ namespace BrnShop.Web.Controllers
 
             if (errorList.Length == 1)
             {
-                if (partUserInfo.Email.Length == 0 && partUserInfo.Mobile.Length == 0)
+                if (partUserInfo != null && (partUserInfo.Email.Length == 0 && partUserInfo.Mobile.Length == 0))
                     return AjaxResult("nocanfind", "由于您没有设置邮箱和手机，所以不能找回此账号的密码");
 
                 return AjaxResult("success", Url.Action("selectfindpwdtype", new RouteValueDictionary { { "uid", partUserInfo.Uid } }));
@@ -538,13 +550,12 @@ namespace BrnShop.Web.Controllers
         /// <returns></returns>
         public ActionResult SelectFindPwdType()
         {
-            int uid = WebHelper.GetQueryInt("uid");
-            PartUserInfo partUserInfo = Users.GetPartUserById(uid);
+            var uid = WebHelper.GetQueryInt("uid");
+            var partUserInfo = Users.GetPartUserById(uid);
             if (partUserInfo == null)
                 return PromptView("用户不存在");
 
-            SelectFindPwdTypeModel model = new SelectFindPwdTypeModel();
-            model.PartUserInfo = partUserInfo;
+            var model = new SelectFindPwdTypeModel {PartUserInfo = partUserInfo};
             return View(model);
         }
 
@@ -553,18 +564,21 @@ namespace BrnShop.Web.Controllers
         /// </summary>
         public ActionResult SendFindPwdEmail()
         {
-            int uid = WebHelper.GetQueryInt("uid");
+            var uid = WebHelper.GetQueryInt("uid");
 
-            PartUserInfo partUserInfo = Users.GetPartUserById(uid);
+            var partUserInfo = Users.GetPartUserById(uid);
             if (partUserInfo == null)
                 return AjaxResult("nouser", "用户不存在");
             if (partUserInfo.Email.Length == 0)
                 return AjaxResult("nocanfind", "由于您没有设置邮箱，所以不能通过邮箱找回此账号的密码");
 
             //发送找回密码邮件
-            string v = ShopUtils.AESEncrypt(string.Format("{0},{1},{2}", partUserInfo.Uid, DateTime.Now, Randoms.CreateRandomValue(6)));
-            string url = string.Format("http://{0}{1}", Request.Url.Authority, Url.Action("resetpwd", new RouteValueDictionary { { "v", v } }));
-            Emails.SendFindPwdEmail(partUserInfo.Email, partUserInfo.UserName, url);
+            string v = ShopUtils.AESEncrypt($"{partUserInfo.Uid},{DateTime.Now},{Randoms.CreateRandomValue(6)}");
+            if (Request.Url != null)
+            {
+                var url = $"http://{Request.Url.Authority}{Url.Action("resetpwd", new RouteValueDictionary {{"v", v}})}";
+                Emails.SendFindPwdEmail(partUserInfo.Email, partUserInfo.UserName, url);
+            }
             return AjaxResult("success", "邮件已发送,请查收");
         }
 
@@ -593,10 +607,10 @@ namespace BrnShop.Web.Controllers
         /// </summary>
         public ActionResult VerifyFindPwdMobile()
         {
-            int uid = WebHelper.GetQueryInt("uid");
-            string mobileCode = WebHelper.GetFormString("mobileCode");
+            var uid = WebHelper.GetQueryInt("uid");
+            var mobileCode = WebHelper.GetFormString("mobileCode");
 
-            PartUserInfo partUserInfo = Users.GetPartUserById(uid);
+            var partUserInfo = Users.GetPartUserById(uid);
             if (partUserInfo == null)
                 return AjaxResult("nouser", "用户不存在");
             if (partUserInfo.Mobile.Length == 0)
@@ -612,8 +626,9 @@ namespace BrnShop.Web.Controllers
                 return AjaxResult("wrongmobilecode", "手机验证码不正确");
             }
 
-            string v = ShopUtils.AESEncrypt(string.Format("{0},{1},{2}", partUserInfo.Uid, DateTime.Now, Randoms.CreateRandomValue(6)));
-            string url = string.Format("http://{0}{1}", Request.Url.Authority, Url.Action("resetpwd", new RouteValueDictionary { { "v", v } }));
+            var v = ShopUtils.AESEncrypt($"{partUserInfo.Uid},{DateTime.Now},{Randoms.CreateRandomValue(6)}");
+            if (Request.Url == null) return null;
+            string url = $"http://{Request.Url.Authority}{Url.Action("resetpwd", new RouteValueDictionary {{"v", v}})}";
             return AjaxResult("success", url);
         }
 
@@ -622,12 +637,12 @@ namespace BrnShop.Web.Controllers
         /// </summary>
         public ActionResult ResetPwd()
         {
-            string v = WebHelper.GetQueryString("v");
+            var v = WebHelper.GetQueryString("v");
             //解密字符串
-            string realV = SecureHelper.AESDecrypt(v, WorkContext.ShopConfig.SecretKey);
+            var realV = SecureHelper.AESDecrypt(v, WorkContext.ShopConfig.SecretKey);
 
             //数组第一项为uid，第二项为验证时间,第三项为随机值
-            string[] result = StringHelper.SplitString(realV);
+            var result = StringHelper.SplitString(realV);
             if (result.Length != 3)
                 return HttpNotFound();
 
@@ -644,8 +659,7 @@ namespace BrnShop.Web.Controllers
             //get请求
             if (WebHelper.IsGet())
             {
-                ResetPwdModel model = new ResetPwdModel();
-                model.V = v;
+                var model = new ResetPwdModel {V = v};
                 return View(model);
             }
 

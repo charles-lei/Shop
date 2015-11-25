@@ -1,6 +1,4 @@
-﻿using System;
-
-using BrnShop.Core;
+﻿using BrnShop.Core;
 using BrnShop.Core.Data.RDBS;
 
 namespace BrnShop.Services
@@ -8,7 +6,7 @@ namespace BrnShop.Services
     /// <summary>
     /// 数据库操作管理类
     /// </summary>
-    public partial class DataBases
+    public class DataBases
     {
         /// <summary>
         /// 运行SQL语句
@@ -17,14 +15,14 @@ namespace BrnShop.Services
         /// <returns></returns>
         public static string RunSql(string sql)
         {
-            return BrnShop.Data.DataBases.RunSql(sql);
+            return Data.DataBases.RunSql(sql);
         }
 
         /// <summary>
         /// 获得数据库名称
         /// </summary>
         /// <returns></returns>
-        public static string GetDBName()
+        public static string GetDbName()
         {
             string[] itemList = StringHelper.SplitString(RdbsHelper.ConnectionString, ";");
             foreach (string item in itemList)
