@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Collections.Generic;
 
 using BrnShop.Core;
+using BrnShop.Core.Data.RDBS;
 
 namespace BrnShop.OrderStrategy.SqlServer
 {
@@ -61,8 +62,8 @@ namespace BrnShop.OrderStrategy.SqlServer
                                         GenerateInParam("@buyerremark", SqlDbType.NVarChar,250 ,orderInfo.BuyerRemark),
                                         GenerateInParam("@ip", SqlDbType.VarChar,15 ,orderInfo.IP)
                                     };
-            int oid = TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.StoredProcedure,
-                                                                      string.Format("{0}createorder", RDBSHelper.RDBSTablePre),
+            int oid = TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.StoredProcedure,
+                                                                      string.Format("{0}createorder", RdbsHelper.RdbsTablePre),
                                                                       parms), -1);
 
             if (oid > 0)
@@ -78,8 +79,8 @@ namespace BrnShop.OrderStrategy.SqlServer
                                                 GenerateInParam("@recordidlist", SqlDbType.NVarChar, 1000, recordIdList.Remove(recordIdList.Length - 1,1).ToString()),
                                                 GenerateInParam("@oid", SqlDbType.Int, 4, oid),
                                               };
-                    RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                               string.Format("{0}updateorderproductoid", RDBSHelper.RDBSTablePre),
+                    RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                               string.Format("{0}updateorderproductoid", RdbsHelper.RdbsTablePre),
                                                parms);
                 }
                 else
@@ -116,8 +117,8 @@ namespace BrnShop.OrderStrategy.SqlServer
                                                 GenerateInParam("@extcode5", SqlDbType.Int, 4, orderProductInfo.ExtCode5),
                                                 GenerateInParam("@addtime", SqlDbType.DateTime, 8, orderProductInfo.AddTime)
                                               };
-                        RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                                   string.Format("{0}addorderproduct", RDBSHelper.RDBSTablePre),
+                        RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                                   string.Format("{0}addorderproduct", RdbsHelper.RdbsTablePre),
                                                    parms);
                     }
                 }

@@ -4,6 +4,7 @@ using System.Text;
 using System.Data.Common;
 
 using BrnShop.Core;
+using BrnShop.Core.Data.RDBS;
 
 namespace BrnShop.RDBSStrategy.SqlServer
 {
@@ -24,8 +25,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
             DbParameter[] parms = {
 	                                 GenerateInParam("@oid", SqlDbType.Int,4,oid)
                                     };
-            return RDBSHelper.ExecuteReader(CommandType.StoredProcedure,
-                                            string.Format("{0}getorderbyoid", RDBSHelper.RDBSTablePre),
+            return RdbsHelper.ExecuteReader(CommandType.StoredProcedure,
+                                            string.Format("{0}getorderbyoid", RdbsHelper.RdbsTablePre),
                                             parms);
         }
 
@@ -39,8 +40,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
             DbParameter[] parms = {
 	                                 GenerateInParam("@osn", SqlDbType.Char,30,osn)
                                     };
-            return RDBSHelper.ExecuteReader(CommandType.StoredProcedure,
-                                            string.Format("{0}getorderbyosn", RDBSHelper.RDBSTablePre),
+            return RdbsHelper.ExecuteReader(CommandType.StoredProcedure,
+                                            string.Format("{0}getorderbyosn", RdbsHelper.RdbsTablePre),
                                             parms);
         }
 
@@ -66,16 +67,16 @@ namespace BrnShop.RDBSStrategy.SqlServer
             if (condition.Length > 0)
             {
                 commandText = string.Format("SELECT COUNT([oid]) FROM [{0}orders] WHERE {1}",
-                                             RDBSHelper.RDBSTablePre,
+                                             RdbsHelper.RdbsTablePre,
                                              condition.Remove(0, 4).ToString());
             }
             else
             {
                 commandText = string.Format("SELECT COUNT([oid]) FROM [{0}orders]",
-                                            RDBSHelper.RDBSTablePre);
+                                            RdbsHelper.RdbsTablePre);
             }
 
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText));
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText));
         }
 
         /// <summary>
@@ -95,13 +96,13 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (noCondition)
                     commandText = string.Format("SELECT [temp1].[oid],[temp1].[osn],[temp1].[uid],[temp1].[orderstate],[temp1].[orderamount],[temp1].[surplusmoney],[temp1].[parentid],[temp1].[isreview],[temp1].[addtime],[temp1].[regionid],[temp1].[consignee],[temp1].[mobile],[temp1].[phone],[temp1].[email],[temp1].[zipcode],[temp1].[address],[temp1].[besttime],[temp2].[username],[temp3].[provincename],[temp3].[cityname],[temp3].[name] AS [countyname] FROM (SELECT TOP {0} [oid],[osn],[uid],[orderstate],[orderamount],[surplusmoney],[parentid],[isreview],[addtime],[regionid],[consignee],[mobile],[phone],[email],[zipcode],[address],[besttime] FROM [{1}orders] ORDER BY {2}) AS [temp1] LEFT JOIN [{1}users] AS [temp2] ON [temp1].[uid]=[temp2].[uid] LEFT JOIN [{1}regions] AS [temp3] ON [temp1].[regionid]=[temp3].[regionid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 sort);
 
                 else
                     commandText = string.Format("SELECT [temp1].[oid],[temp1].[osn],[temp1].[uid],[temp1].[orderstate],[temp1].[orderamount],[temp1].[surplusmoney],[temp1].[parentid],[temp1].[isreview],[temp1].[addtime],[temp1].[regionid],[temp1].[consignee],[temp1].[mobile],[temp1].[phone],[temp1].[email],[temp1].[zipcode],[temp1].[address],[temp1].[besttime],[temp2].[username],[temp3].[provincename],[temp3].[cityname],[temp3].[name] AS [countyname] FROM (SELECT TOP {0} [oid],[osn],[uid],[orderstate],[orderamount],[surplusmoney],[parentid],[isreview],[addtime],[regionid],[consignee],[mobile],[phone],[email],[zipcode],[address],[besttime] FROM [{1}orders] WHERE {3} ORDER BY {2}) AS [temp1] LEFT JOIN [{1}users] AS [temp2] ON [temp1].[uid]=[temp2].[uid] LEFT JOIN [{1}regions] AS [temp3] ON [temp1].[regionid]=[temp3].[regionid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 sort,
                                                 condition);
             }
@@ -110,7 +111,7 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (noCondition)
                     commandText = string.Format("SELECT [temp1].[oid],[temp1].[osn],[temp1].[uid],[temp1].[orderstate],[temp1].[orderamount],[temp1].[surplusmoney],[temp1].[parentid],[temp1].[isreview],[temp1].[addtime],[temp1].[regionid],[temp1].[consignee],[temp1].[mobile],[temp1].[phone],[temp1].[email],[temp1].[zipcode],[temp1].[address],[temp1].[besttime],[temp2].[username],[temp3].[provincename],[temp3].[cityname],[temp3].[name] AS [countyname] FROM (SELECT [oid],[osn],[uid],[orderstate],[orderamount],[surplusmoney],[parentid],[isreview],[addtime],[regionid],[consignee],[mobile],[phone],[email],[zipcode],[address],[besttime] FROM (SELECT TOP {0} ROW_NUMBER() OVER (ORDER BY {2}) AS [rowid],[oid],[osn],[uid],[orderstate],[orderamount],[surplusmoney],[parentid],[isreview],[addtime],[regionid],[consignee],[mobile],[phone],[email],[zipcode],[address],[besttime] FROM [{1}orders]) AS [temp] WHERE [temp].[rowid] BETWEEN {3} AND {4}) AS [temp1] LEFT JOIN [{1}users] AS [temp2] ON [temp1].[uid]=[temp2].[uid] LEFT JOIN [{1}regions] AS [temp3] ON [temp1].[regionid]=[temp3].[regionid]",
                                                 pageSize * pageNumber,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 sort,
                                                 pageSize * (pageNumber - 1) + 1,
                                                 pageSize * pageNumber);
@@ -118,14 +119,14 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 else
                     commandText = string.Format("SELECT [temp1].[oid],[temp1].[osn],[temp1].[uid],[temp1].[orderstate],[temp1].[orderamount],[temp1].[surplusmoney],[temp1].[parentid],[temp1].[isreview],[temp1].[addtime],[temp1].[regionid],[temp1].[consignee],[temp1].[mobile],[temp1].[phone],[temp1].[email],[temp1].[zipcode],[temp1].[address],[temp1].[besttime],[temp2].[username],[temp3].[provincename],[temp3].[cityname],[temp3].[name] AS [countyname] FROM (SELECT [oid],[osn],[uid],[orderstate],[orderamount],[surplusmoney],[parentid],[isreview],[addtime],[regionid],[consignee],[mobile],[phone],[email],[zipcode],[address],[besttime] FROM (SELECT TOP {0} ROW_NUMBER() OVER (ORDER BY {2}) AS [rowid],[oid],[osn],[uid],[orderstate],[orderamount],[surplusmoney],[parentid],[isreview],[addtime],[regionid],[consignee],[mobile],[phone],[email],[zipcode],[address],[besttime] FROM [{1}orders] WHERE {5}) AS [temp] WHERE [temp].[rowid] BETWEEN {3} AND {4}) AS [temp1] LEFT JOIN [{1}users] AS [temp2] ON [temp1].[uid]=[temp2].[uid] LEFT JOIN [{1}regions] AS [temp3] ON [temp1].[regionid]=[temp3].[regionid]",
                                                 pageSize * pageNumber,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 sort,
                                                 pageSize * (pageNumber - 1) + 1,
                                                 pageSize * pageNumber,
                                                 condition);
             }
 
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
         }
 
         /// <summary>
@@ -177,11 +178,11 @@ namespace BrnShop.RDBSStrategy.SqlServer
         {
             string commandText;
             if (string.IsNullOrWhiteSpace(condition))
-                commandText = string.Format("SELECT COUNT(oid) FROM [{0}orders]", RDBSHelper.RDBSTablePre);
+                commandText = string.Format("SELECT COUNT(oid) FROM [{0}orders]", RdbsHelper.RdbsTablePre);
             else
-                commandText = string.Format("SELECT COUNT(oid) FROM [{0}orders] WHERE {1}", RDBSHelper.RDBSTablePre, condition);
+                commandText = string.Format("SELECT COUNT(oid) FROM [{0}orders] WHERE {1}", RdbsHelper.RdbsTablePre, condition);
 
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText), 0);
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText), 0);
         }
 
         /// <summary>
@@ -194,8 +195,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
             DbParameter[] parms = {
                                     GenerateInParam("@oid", SqlDbType.Int, 4, oid)    
                                    };
-            return RDBSHelper.ExecuteReader(CommandType.StoredProcedure,
-                                            string.Format("{0}getorderproductlistbyoid", RDBSHelper.RDBSTablePre),
+            return RdbsHelper.ExecuteReader(CommandType.StoredProcedure,
+                                            string.Format("{0}getorderproductlistbyoid", RdbsHelper.RdbsTablePre),
                                             parms);
         }
 
@@ -209,8 +210,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
             DbParameter[] parms = {
                                     GenerateInParam("@oidlist", SqlDbType.NVarChar, 1000, oidList)    
                                    };
-            return RDBSHelper.ExecuteReader(CommandType.StoredProcedure,
-                                            string.Format("{0}getorderproductlistbyoidlist", RDBSHelper.RDBSTablePre),
+            return RdbsHelper.ExecuteReader(CommandType.StoredProcedure,
+                                            string.Format("{0}getorderproductlistbyoidlist", RdbsHelper.RdbsTablePre),
                                             parms);
         }
 
@@ -229,8 +230,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@orderamount", SqlDbType.Decimal, 8, orderAmount),
                                     GenerateInParam("@surplusmoney", SqlDbType.Decimal, 8, surplusMoney)
                                    };
-            RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                       string.Format("{0}updateorderdiscount", RDBSHelper.RDBSTablePre),
+            RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                       string.Format("{0}updateorderdiscount", RdbsHelper.RdbsTablePre),
                                        parms);
         }
 
@@ -245,8 +246,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@oid", SqlDbType.Int, 4, oid), 
                                     GenerateInParam("@orderstate", SqlDbType.TinyInt, 1, (int)orderState)
                                    };
-            RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                       string.Format("{0}updateorderstate", RDBSHelper.RDBSTablePre),
+            RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                       string.Format("{0}updateorderstate", RdbsHelper.RdbsTablePre),
                                        parms);
         }
 
@@ -265,8 +266,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@shipsn", SqlDbType.Char, 30, shipSN),
                                     GenerateInParam("@shiptime", SqlDbType.DateTime, 8, shipTime)
                                    };
-            RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                       string.Format("{0}sendorderproduct", RDBSHelper.RDBSTablePre),
+            RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                       string.Format("{0}sendorderproduct", RdbsHelper.RdbsTablePre),
                                        parms);
         }
 
@@ -285,8 +286,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@paysn", SqlDbType.Char, 30, paySN),
                                     GenerateInParam("@paytime", SqlDbType.DateTime, 8, payTime)
                                    };
-            RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                       string.Format("{0}payorder", RDBSHelper.RDBSTablePre),
+            RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                       string.Format("{0}payorder", RdbsHelper.RdbsTablePre),
                                        parms);
         }
 
@@ -301,8 +302,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@oid", SqlDbType.Int, 4, oid), 
                                     GenerateInParam("@isreview", SqlDbType.TinyInt, 1, isReview)
                                    };
-            RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                       string.Format("{0}updateorderisreview", RDBSHelper.RDBSTablePre),
+            RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                       string.Format("{0}updateorderisreview", RdbsHelper.RdbsTablePre),
                                        parms);
         }
 
@@ -316,8 +317,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
 	                                 GenerateInParam("@expiretime", SqlDbType.DateTime,8,expireTime)
                                    };
             string commandText = string.Format("DELETE FROM [{0}orderproducts] WHERE [oid] IN (SELECT [oid] FROM [{0}orders] WHERE [paymode]=1 AND [paysn]='' AND [addtime]<@expiretime);DELETE FROM [{0}orders] WHERE [paymode]=1 AND [paysn]='' AND [addtime]<@expiretime",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -330,8 +331,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
 	                                 GenerateInParam("@expiretime", SqlDbType.DateTime,8,expireTime)
                                    };
             string commandText = string.Format("DELETE FROM [{0}orderproducts] WHERE [oid] IN (SELECT [oid] FROM [{0}orders] WHERE [paymode]=2 AND [paysn]='' AND [addtime]<@expiretime);DELETE FROM [{0}orders] WHERE [paymode]=2 AND [paysn]='' AND [addtime]<@expiretime",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -354,8 +355,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@endaddtime", SqlDbType.VarChar, 30, endAddTime.Length > 0? TypeHelper.StringToDateTime(endAddTime).ToString("yyyy-MM-dd HH:mm:ss") : ""),
                                     GenerateInParam("@orderstate", SqlDbType.TinyInt, 1, orderState)
                                    };
-            return RDBSHelper.ExecuteDataset(CommandType.StoredProcedure,
-                                             string.Format("{0}getuserorderlist", RDBSHelper.RDBSTablePre),
+            return RdbsHelper.ExecuteDataset(CommandType.StoredProcedure,
+                                             string.Format("{0}getuserorderlist", RdbsHelper.RdbsTablePre),
                                              parms).Tables[0];
         }
 
@@ -375,8 +376,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@endaddtime", SqlDbType.VarChar, 30, endAddTime.Length > 0? TypeHelper.StringToDateTime(endAddTime).ToString("yyyy-MM-dd HH:mm:ss") : ""),
                                     GenerateInParam("@orderstate", SqlDbType.TinyInt, 1, orderState)
                                    };
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.StoredProcedure,
-                                                                   string.Format("{0}getuserordercount", RDBSHelper.RDBSTablePre),
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.StoredProcedure,
+                                                                   string.Format("{0}getuserordercount", RdbsHelper.RdbsTablePre),
                                                                    parms));
         }
 
@@ -395,20 +396,20 @@ namespace BrnShop.RDBSStrategy.SqlServer
             if (pageNumber == 1)
             {
                 commandText = string.Format("SELECT TOP {2} [temp2].[psn],[temp2].[name],[temp2].[realcount],[temp2].[shopprice],[temp1].[osn],[temp1].[addtime] FROM (SELECT [oid],[osn],[addtime] FROM [{0}orders] WHERE {1}) AS [temp1] LEFT JOIN [{0}orderproducts] AS [temp2] ON [temp1].[oid]=[temp2].[oid] ORDER BY [recordid] DESC",
-                                             RDBSHelper.RDBSTablePre,
+                                             RdbsHelper.RdbsTablePre,
                                              condition,
                                              pageSize);
             }
             else
             {
                 commandText = string.Format("SELECT [psn],[name],[realcount],[shopprice],[osn],[addtime] FROM (SELECT TOP {1} ROW_NUMBER() OVER (ORDER BY [recordid] DESC) AS [rowid],[temp2].[psn],[temp2].[name],[temp2].[realcount],[temp2].[shopprice],[temp1].[osn],[temp1].[addtime] FROM (SELECT [oid],[osn],[addtime] FROM [{0}orders] WHERE {3}) AS [temp1] LEFT JOIN [{0}orderproducts] AS [temp2] ON [temp1].[oid]=[temp2].[oid]) AS [temp] WHERE [temp].[rowid] BETWEEN {2} AND {1}",
-                                             RDBSHelper.RDBSTablePre,
+                                             RdbsHelper.RdbsTablePre,
                                              pageNumber * pageSize,
                                              (pageNumber - 1) * pageSize + 1,
                                              condition);
             }
 
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
         }
 
         /// <summary>
@@ -421,9 +422,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         {
             string condition = GetSaleProductListCondition(startTime, endTime);
             string commandText = string.Format("SELECT COUNT([temp2].[recordid]) FROM (SELECT [oid],[osn],[addtime] FROM [{0}orders] WHERE {1}) AS [temp1] LEFT JOIN [{0}orderproducts] AS [temp2] ON [temp1].[oid]=[temp2].[oid]",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 condition);
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText));
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText));
         }
 
         /// <summary>
@@ -486,7 +487,7 @@ namespace BrnShop.RDBSStrategy.SqlServer
             if (trendType == 0)
             {
                 commandText = string.Format("SELECT COUNT([oid]) AS [value],[time] FROM (SELECT [oid],{3} AS [time] FROM [{0}orders] WHERE [orderstate]={1} {2}) AS [temp] GROUP BY [temp].[time]",
-                                             RDBSHelper.RDBSTablePre,
+                                             RdbsHelper.RdbsTablePre,
                                              (int)OrderState.Completed,
                                              timeCondition.ToString(),
                                              timeFormat);
@@ -494,12 +495,12 @@ namespace BrnShop.RDBSStrategy.SqlServer
             else
             {
                 commandText = string.Format("SELECT SUM([orderamount]) AS [value],[time] FROM (SELECT [oid],[orderamount],{3} AS [time] FROM [{0}orders] WHERE [orderstate]={1} {2}) AS [temp] GROUP BY [temp].[time]",
-                                             RDBSHelper.RDBSTablePre,
+                                             RdbsHelper.RdbsTablePre,
                                              (int)OrderState.Completed,
                                              timeCondition.ToString(),
                                              timeFormat);
             }
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
         }
 
         #endregion
@@ -522,8 +523,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                         GenerateInParam("@actiontime", SqlDbType.DateTime, 8,orderActionInfo.ActionTime),
                                         GenerateInParam("@actiondes", SqlDbType.NVarChar, 250,orderActionInfo.ActionDes)
                                     };
-            RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                       string.Format("{0}createorderaction", RDBSHelper.RDBSTablePre),
+            RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                       string.Format("{0}createorderaction", RdbsHelper.RdbsTablePre),
                                        parms);
         }
 
@@ -537,8 +538,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
             DbParameter[] parms = {
 	                                    GenerateInParam("@oid", SqlDbType.Int,4,oid)
                                     };
-            return RDBSHelper.ExecuteReader(CommandType.StoredProcedure,
-                                            string.Format("{0}getorderactionlist", RDBSHelper.RDBSTablePre),
+            return RdbsHelper.ExecuteReader(CommandType.StoredProcedure,
+                                            string.Format("{0}getorderactionlist", RdbsHelper.RdbsTablePre),
                                             parms);
         }
 
@@ -557,8 +558,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@orderactiontype", SqlDbType.TinyInt, 1, orderActionType)
                                    };
             string commandText = string.Format("SELECT [oid] FROM [{0}orderactions] WHERE [actiontype]=@orderactiontype AND [actiontime]>=@starttime AND [actiontime]<@endtime",
-                                                RDBSHelper.RDBSTablePre);
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText, parms).Tables[0];
+                                                RdbsHelper.RdbsTablePre);
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText, parms).Tables[0];
         }
 
         #endregion
@@ -587,8 +588,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@paysystemname", SqlDbType.VarChar,20 ,orderRefundInfo.PaySystemName),
                                     GenerateInParam("@payfriendname", SqlDbType.NVarChar,30 ,orderRefundInfo.PayFriendName)
                                    };
-            RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                       string.Format("{0}applyrefund", RDBSHelper.RDBSTablePre),
+            RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                       string.Format("{0}applyrefund", RdbsHelper.RdbsTablePre),
                                        parms);
         }
 
@@ -609,8 +610,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@refundfriendname", SqlDbType.NVarChar,30 ,refundFriendName),
                                     GenerateInParam("@refundtime", SqlDbType.DateTime,8 ,refundTime)
                                    };
-            RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                       string.Format("{0}refundorder", RDBSHelper.RDBSTablePre),
+            RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                       string.Format("{0}refundorder", RdbsHelper.RdbsTablePre),
                                        parms);
         }
 
@@ -630,13 +631,13 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (noCondition)
                     commandText = string.Format("SELECT TOP {0} {2} FROM [{1}orderrefunds] ORDER BY [refundid] DESC",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.ORDER_REFUNDS);
 
                 else
                     commandText = string.Format("SELECT TOP {0} {3} FROM [{1}orderrefunds] WHERE {2} ORDER BY [refundid] DESC",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 condition,
                                                 RDBSFields.ORDER_REFUNDS);
             }
@@ -645,19 +646,19 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (noCondition)
                     commandText = string.Format("SELECT TOP {0} {3} FROM [{1}orderrefunds] WHERE [refundid] < (SELECT MIN([refundid]) FROM (SELECT TOP {2} [refundid] FROM [{1}orderrefunds] ORDER BY [refundid] DESC) AS [temp]) ORDER BY [refundid] DESC",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 (pageNumber - 1) * pageSize,
                                                 RDBSFields.ORDER_REFUNDS);
                 else
                     commandText = string.Format("SELECT TOP {0} {4} FROM [{1}orderrefunds] WHERE [refundid] < (SELECT MIN([refundid]) FROM (SELECT TOP {2} [refundid] FROM [{1}orderrefunds] WHERE {3} ORDER BY [refundid] DESC) AS [temp]) AND {3} ORDER BY [refundid] DESC",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 (pageNumber - 1) * pageSize,
                                                 condition,
                                                 RDBSFields.ORDER_REFUNDS);
             }
 
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText);
         }
 
         /// <summary>
@@ -682,11 +683,11 @@ namespace BrnShop.RDBSStrategy.SqlServer
         {
             string commandText;
             if (string.IsNullOrWhiteSpace(condition))
-                commandText = string.Format("SELECT COUNT(refundid) FROM [{0}orderrefunds]", RDBSHelper.RDBSTablePre);
+                commandText = string.Format("SELECT COUNT(refundid) FROM [{0}orderrefunds]", RdbsHelper.RdbsTablePre);
             else
-                commandText = string.Format("SELECT COUNT(refundid) FROM [{0}orderrefunds] WHERE {1}", RDBSHelper.RDBSTablePre, condition);
+                commandText = string.Format("SELECT COUNT(refundid) FROM [{0}orderrefunds] WHERE {1}", RdbsHelper.RdbsTablePre, condition);
 
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText), 0);
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText), 0);
         }
 
         #endregion

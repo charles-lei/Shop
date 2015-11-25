@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Collections.Generic;
 
 using BrnShop.Core;
+using BrnShop.Core.Data.RDBS;
 
 namespace BrnShop.CartStrategy.SqlServer
 {
@@ -32,8 +33,8 @@ namespace BrnShop.CartStrategy.SqlServer
             DbParameter[] parms = {
                                     GenerateInParam("@uid", SqlDbType.Int, 4, uid)    
                                    };
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.StoredProcedure,
-                                                                   string.Format("{0}getcartproductcountbyuid", RDBSHelper.RDBSTablePre),
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.StoredProcedure,
+                                                                   string.Format("{0}getcartproductcountbyuid", RdbsHelper.RdbsTablePre),
                                                                    parms), -2);
         }
 
@@ -47,8 +48,8 @@ namespace BrnShop.CartStrategy.SqlServer
             DbParameter[] parms = {
                                      GenerateInParam("@sid", SqlDbType.Char, 16, sid)    
                                    };
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.StoredProcedure,
-                                                                   string.Format("{0}getcartproductcountbysid", RDBSHelper.RDBSTablePre),
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.StoredProcedure,
+                                                                   string.Format("{0}getcartproductcountbysid", RdbsHelper.RdbsTablePre),
                                                                    parms), -2);
         }
 
@@ -89,8 +90,8 @@ namespace BrnShop.CartStrategy.SqlServer
                                         GenerateInParam("@extcode5", SqlDbType.Int, 4, orderProductInfo.ExtCode5),
                                         GenerateInParam("@addtime", SqlDbType.DateTime, 8, orderProductInfo.AddTime)
                                     };
-                RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                           string.Format("{0}addorderproduct", RDBSHelper.RDBSTablePre),
+                RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                           string.Format("{0}addorderproduct", RdbsHelper.RdbsTablePre),
                                            parms);
             }
         }
@@ -108,8 +109,8 @@ namespace BrnShop.CartStrategy.SqlServer
             DbParameter[] parms = {
                                     GenerateInParam("@recordidlist", SqlDbType.NVarChar, 1000, recordIdList.Remove(recordIdList.Length - 1, 1).ToString())
                                    };
-            RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                       string.Format("{0}deleteorderproductbyrecordid", RDBSHelper.RDBSTablePre),
+            RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                       string.Format("{0}deleteorderproductbyrecordid", RdbsHelper.RdbsTablePre),
                                        parms);
         }
 
@@ -122,9 +123,9 @@ namespace BrnShop.CartStrategy.SqlServer
             StringBuilder sql = new StringBuilder();
             foreach (OrderProductInfo orderProductInfo in orderProductList)
             {
-                sql.AppendFormat("UPDATE [{0}orderproducts] SET [realcount]={1},[buycount]={2},[extcode2]={3} WHERE [recordid]={4};", RDBSHelper.RDBSTablePre, orderProductInfo.RealCount, orderProductInfo.BuyCount, orderProductInfo.ExtCode2, orderProductInfo.RecordId);
+                sql.AppendFormat("UPDATE [{0}orderproducts] SET [realcount]={1},[buycount]={2},[extcode2]={3} WHERE [recordid]={4};", RdbsHelper.RdbsTablePre, orderProductInfo.RealCount, orderProductInfo.BuyCount, orderProductInfo.ExtCode2, orderProductInfo.RecordId);
             }
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, sql.ToString());
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, sql.ToString());
         }
 
         /// <summary>
@@ -138,8 +139,8 @@ namespace BrnShop.CartStrategy.SqlServer
                                       GenerateInParam("@uid", SqlDbType.Int, 4, uid),
                                       GenerateInParam("@sid", SqlDbType.Char, 16, sid)    
                                     };
-            RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                       string.Format("{0}updatecartuidbysid", RDBSHelper.RDBSTablePre),
+            RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                       string.Format("{0}updatecartuidbysid", RdbsHelper.RdbsTablePre),
                                        parms);
         }
 
@@ -152,9 +153,9 @@ namespace BrnShop.CartStrategy.SqlServer
             StringBuilder sql = new StringBuilder();
             foreach (OrderProductInfo orderProductInfo in orderProductList)
             {
-                sql.AppendFormat("UPDATE [{0}orderproducts] SET [realcount]={1},[buycount]={2},[extcode2]={3} WHERE [recordid]={4};", RDBSHelper.RDBSTablePre, orderProductInfo.RealCount, orderProductInfo.BuyCount, orderProductInfo.ExtCode2, orderProductInfo.RecordId);
+                sql.AppendFormat("UPDATE [{0}orderproducts] SET [realcount]={1},[buycount]={2},[extcode2]={3} WHERE [recordid]={4};", RdbsHelper.RdbsTablePre, orderProductInfo.RealCount, orderProductInfo.BuyCount, orderProductInfo.ExtCode2, orderProductInfo.RecordId);
             }
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, sql.ToString());
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, sql.ToString());
         }
 
         /// <summary>
@@ -166,9 +167,9 @@ namespace BrnShop.CartStrategy.SqlServer
             StringBuilder sql = new StringBuilder();
             foreach (OrderProductInfo orderProductInfo in orderProductList)
             {
-                sql.AppendFormat("UPDATE [{0}orderproducts] SET [discountprice]={1},[paycredits]={2},[coupontypeid]={3},[extcode1]={4} WHERE [recordid]={5};", RDBSHelper.RDBSTablePre, orderProductInfo.DiscountPrice, orderProductInfo.PayCredits, orderProductInfo.CouponTypeId, orderProductInfo.ExtCode1, orderProductInfo.RecordId);
+                sql.AppendFormat("UPDATE [{0}orderproducts] SET [discountprice]={1},[paycredits]={2},[coupontypeid]={3},[extcode1]={4} WHERE [recordid]={5};", RdbsHelper.RdbsTablePre, orderProductInfo.DiscountPrice, orderProductInfo.PayCredits, orderProductInfo.CouponTypeId, orderProductInfo.ExtCode1, orderProductInfo.RecordId);
             }
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, sql.ToString());
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, sql.ToString());
         }
 
         /// <summary>
@@ -180,9 +181,9 @@ namespace BrnShop.CartStrategy.SqlServer
             StringBuilder sql = new StringBuilder();
             foreach (OrderProductInfo orderProductInfo in orderProductList)
             {
-                sql.AppendFormat("UPDATE [{0}orderproducts] SET [extcode3]={1} WHERE [recordid]={2};", RDBSHelper.RDBSTablePre, orderProductInfo.ExtCode3, orderProductInfo.RecordId);
+                sql.AppendFormat("UPDATE [{0}orderproducts] SET [extcode3]={1} WHERE [recordid]={2};", RdbsHelper.RdbsTablePre, orderProductInfo.ExtCode3, orderProductInfo.RecordId);
             }
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, sql.ToString());
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, sql.ToString());
         }
 
         /// <summary>
@@ -194,9 +195,9 @@ namespace BrnShop.CartStrategy.SqlServer
             StringBuilder sql = new StringBuilder();
             foreach (OrderProductInfo orderProductInfo in orderProductList)
             {
-                sql.AppendFormat("UPDATE [{0}orderproducts] SET [extcode4]={1} WHERE [recordid]={2};", RDBSHelper.RDBSTablePre, orderProductInfo.ExtCode4, orderProductInfo.RecordId);
+                sql.AppendFormat("UPDATE [{0}orderproducts] SET [extcode4]={1} WHERE [recordid]={2};", RdbsHelper.RdbsTablePre, orderProductInfo.ExtCode4, orderProductInfo.RecordId);
             }
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, sql.ToString());
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, sql.ToString());
         }
 
         /// <summary>
@@ -208,9 +209,9 @@ namespace BrnShop.CartStrategy.SqlServer
             StringBuilder sql = new StringBuilder();
             foreach (OrderProductInfo orderProductInfo in orderProductList)
             {
-                sql.AppendFormat("UPDATE [{0}orderproducts] SET [extcode5]={1} WHERE [recordid]={2};", RDBSHelper.RDBSTablePre, orderProductInfo.ExtCode5, orderProductInfo.RecordId);
+                sql.AppendFormat("UPDATE [{0}orderproducts] SET [extcode5]={1} WHERE [recordid]={2};", RdbsHelper.RdbsTablePre, orderProductInfo.ExtCode5, orderProductInfo.RecordId);
             }
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, sql.ToString());
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, sql.ToString());
         }
 
         /// <summary>
@@ -225,8 +226,8 @@ namespace BrnShop.CartStrategy.SqlServer
             DbParameter[] parms = {
                                         GenerateInParam("@uid", SqlDbType.Int, 4, uid)    
                                     };
-            IDataReader reader = RDBSHelper.ExecuteReader(CommandType.StoredProcedure,
-                                                          string.Format("{0}getcartproductlistbyuid", RDBSHelper.RDBSTablePre),
+            IDataReader reader = RdbsHelper.ExecuteReader(CommandType.StoredProcedure,
+                                                          string.Format("{0}getcartproductlistbyuid", RdbsHelper.RdbsTablePre),
                                                           parms);
             while (reader.Read())
             {
@@ -250,8 +251,8 @@ namespace BrnShop.CartStrategy.SqlServer
             DbParameter[] parms = {
                                         GenerateInParam("@sid", SqlDbType.Char, 16, sid)    
                                     };
-            IDataReader reader = RDBSHelper.ExecuteReader(CommandType.StoredProcedure,
-                                                          string.Format("{0}getcartproductlistbysid", RDBSHelper.RDBSTablePre),
+            IDataReader reader = RdbsHelper.ExecuteReader(CommandType.StoredProcedure,
+                                                          string.Format("{0}getcartproductlistbysid", RdbsHelper.RdbsTablePre),
                                                           parms);
             while (reader.Read())
             {
@@ -273,8 +274,8 @@ namespace BrnShop.CartStrategy.SqlServer
             DbParameter[] parms = {
                                      GenerateInParam("@uid", SqlDbType.Int, 4, uid)
                                     };
-            return RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                              string.Format("{0}clearcartbyuid", RDBSHelper.RDBSTablePre),
+            return RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                              string.Format("{0}clearcartbyuid", RdbsHelper.RdbsTablePre),
                                               parms);
         }
 
@@ -288,8 +289,8 @@ namespace BrnShop.CartStrategy.SqlServer
             DbParameter[] parms = {
                                      GenerateInParam("@sid", SqlDbType.Char, 16, sid)
                                     };
-            return RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                              string.Format("{0}clearcartbysid", RDBSHelper.RDBSTablePre),
+            return RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                              string.Format("{0}clearcartbysid", RdbsHelper.RdbsTablePre),
                                               parms);
         }
 
@@ -303,8 +304,8 @@ namespace BrnShop.CartStrategy.SqlServer
 	                                 GenerateInParam("@expiretime", SqlDbType.DateTime,8,expireTime)
                                    };
             string commandText = string.Format("DELETE FROM [{0}orderproducts] WHERE [oid]=0 AND [addtime]<@expiretime",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         #region  辅助方法

@@ -6,6 +6,7 @@ using System.Data.SqlClient;
 using System.Collections.Generic;
 
 using BrnShop.Core;
+using BrnShop.Core.Data.RDBS;
 
 namespace BrnShop.SearchStrategy.SqlServer
 {
@@ -35,12 +36,12 @@ namespace BrnShop.SearchStrategy.SqlServer
 
             if (pageNumber == 1)
             {
-                commandText.AppendFormat("SELECT TOP {1} [p].[pid],[p].[psn],[p].[cateid],[p].[brandid],[p].[skugid],[p].[name],[p].[shopprice],[p].[marketprice],[p].[costprice],[p].[state],[p].[isbest],[p].[ishot],[p].[isnew],[p].[displayorder],[p].[weight],[p].[showimg],[p].[salecount],[p].[visitcount],[p].[reviewcount],[p].[star1],[p].[star2],[p].[star3],[p].[star4],[p].[star5],[p].[addtime] FROM [{0}products] AS [p]", RDBSHelper.RDBSTablePre, pageSize);
+                commandText.AppendFormat("SELECT TOP {1} [p].[pid],[p].[psn],[p].[cateid],[p].[brandid],[p].[skugid],[p].[name],[p].[shopprice],[p].[marketprice],[p].[costprice],[p].[state],[p].[isbest],[p].[ishot],[p].[isnew],[p].[displayorder],[p].[weight],[p].[showimg],[p].[salecount],[p].[visitcount],[p].[reviewcount],[p].[star1],[p].[star2],[p].[star3],[p].[star4],[p].[star5],[p].[addtime] FROM [{0}products] AS [p]", RdbsHelper.RdbsTablePre, pageSize);
 
                 if (onlyStock == 1)
-                    commandText.AppendFormat(" LEFT JOIN [{0}productstocks] AS [ps] ON [p].[pid]=[ps].[pid]", RDBSHelper.RDBSTablePre);
+                    commandText.AppendFormat(" LEFT JOIN [{0}productstocks] AS [ps] ON [p].[pid]=[ps].[pid]", RdbsHelper.RdbsTablePre);
 
-                commandText.AppendFormat(" LEFT JOIN [{0}productkeywords] AS [pk] ON [p].[pid]=[pk].[pid]", RDBSHelper.RDBSTablePre);
+                commandText.AppendFormat(" LEFT JOIN [{0}productkeywords] AS [pk] ON [p].[pid]=[pk].[pid]", RdbsHelper.RdbsTablePre);
 
                 commandText.AppendFormat(" WHERE [p].[cateid]={0}", cateId);
 
@@ -64,9 +65,9 @@ namespace BrnShop.SearchStrategy.SqlServer
                     for (int i = 0; i < attrValueIdList.Count; i++)
                     {
                         if (i == 0)
-                            commandText.AppendFormat(" (SELECT [pid] FROM [{0}productattributes] WHERE [attrvalueid]={1}) AS [pa1]", RDBSHelper.RDBSTablePre, attrValueIdList[i]);
+                            commandText.AppendFormat(" (SELECT [pid] FROM [{0}productattributes] WHERE [attrvalueid]={1}) AS [pa1]", RdbsHelper.RdbsTablePre, attrValueIdList[i]);
                         else
-                            commandText.AppendFormat(" INNER JOIN (SELECT [pid] FROM [{0}productattributes] WHERE [attrvalueid]={1}) AS [pa{2}] ON [pa{2}].[pid]=[pa{3}].[pid]", RDBSHelper.RDBSTablePre, attrValueIdList[i], i + 1, i);
+                            commandText.AppendFormat(" INNER JOIN (SELECT [pid] FROM [{0}productattributes] WHERE [attrvalueid]={1}) AS [pa{2}] ON [pa{2}].[pid]=[pa{3}].[pid]", RdbsHelper.RdbsTablePre, attrValueIdList[i], i + 1, i);
                     }
                     commandText.Append(")");
                 }
@@ -154,12 +155,12 @@ namespace BrnShop.SearchStrategy.SqlServer
                         commandText.Append(" DESC");
                         break;
                 }
-                commandText.AppendFormat(") AS [rowid],[p].[pid],[p].[psn],[p].[cateid],[p].[brandid],[p].[skugid],[p].[name],[p].[shopprice],[p].[marketprice],[p].[costprice],[p].[state],[p].[isbest],[p].[ishot],[p].[isnew],[p].[displayorder],[p].[weight],[p].[showimg],[p].[salecount],[p].[visitcount],[p].[reviewcount],[p].[star1],[p].[star2],[p].[star3],[p].[star4],[p].[star5],[p].[addtime] FROM [{0}products] AS [p]", RDBSHelper.RDBSTablePre);
+                commandText.AppendFormat(") AS [rowid],[p].[pid],[p].[psn],[p].[cateid],[p].[brandid],[p].[skugid],[p].[name],[p].[shopprice],[p].[marketprice],[p].[costprice],[p].[state],[p].[isbest],[p].[ishot],[p].[isnew],[p].[displayorder],[p].[weight],[p].[showimg],[p].[salecount],[p].[visitcount],[p].[reviewcount],[p].[star1],[p].[star2],[p].[star3],[p].[star4],[p].[star5],[p].[addtime] FROM [{0}products] AS [p]", RdbsHelper.RdbsTablePre);
 
                 if (onlyStock == 1)
-                    commandText.AppendFormat(" LEFT JOIN [{0}productstocks] AS [ps] ON [p].[pid]=[ps].[pid]", RDBSHelper.RDBSTablePre);
+                    commandText.AppendFormat(" LEFT JOIN [{0}productstocks] AS [ps] ON [p].[pid]=[ps].[pid]", RdbsHelper.RdbsTablePre);
 
-                commandText.AppendFormat(" LEFT JOIN [{0}productkeywords] AS [pk] ON [p].[pid]=[pk].[pid]", RDBSHelper.RDBSTablePre);
+                commandText.AppendFormat(" LEFT JOIN [{0}productkeywords] AS [pk] ON [p].[pid]=[pk].[pid]", RdbsHelper.RdbsTablePre);
 
                 commandText.AppendFormat(" WHERE [p].[cateid]={0}", cateId);
 
@@ -183,9 +184,9 @@ namespace BrnShop.SearchStrategy.SqlServer
                     for (int i = 0; i < attrValueIdList.Count; i++)
                     {
                         if (i == 0)
-                            commandText.AppendFormat(" (SELECT [pid] FROM [{0}productattributes] WHERE [attrvalueid]={1}) AS [pa1]", RDBSHelper.RDBSTablePre, attrValueIdList[i]);
+                            commandText.AppendFormat(" (SELECT [pid] FROM [{0}productattributes] WHERE [attrvalueid]={1}) AS [pa1]", RdbsHelper.RdbsTablePre, attrValueIdList[i]);
                         else
-                            commandText.AppendFormat(" INNER JOIN (SELECT [pid] FROM [{0}productattributes] WHERE [attrvalueid]={1}) AS [pa{2}] ON [pa{2}].[pid]=[pa{3}].[pid]", RDBSHelper.RDBSTablePre, attrValueIdList[i], i + 1, i);
+                            commandText.AppendFormat(" INNER JOIN (SELECT [pid] FROM [{0}productattributes] WHERE [attrvalueid]={1}) AS [pa{2}] ON [pa{2}].[pid]=[pa{3}].[pid]", RdbsHelper.RdbsTablePre, attrValueIdList[i], i + 1, i);
                     }
                     commandText.Append(")");
                 }
@@ -201,7 +202,7 @@ namespace BrnShop.SearchStrategy.SqlServer
             }
 
             List<PartProductInfo> partProductList = new List<PartProductInfo>();
-            IDataReader reader = RDBSHelper.ExecuteReader(CommandType.Text, commandText.ToString());
+            IDataReader reader = RdbsHelper.ExecuteReader(CommandType.Text, commandText.ToString());
             while (reader.Read())
             {
                 PartProductInfo partProductInfo = new PartProductInfo();
@@ -253,12 +254,12 @@ namespace BrnShop.SearchStrategy.SqlServer
         {
             StringBuilder commandText = new StringBuilder();
 
-            commandText.AppendFormat("SELECT COUNT([p].[pid]) FROM [{0}products] AS [p]", RDBSHelper.RDBSTablePre);
+            commandText.AppendFormat("SELECT COUNT([p].[pid]) FROM [{0}products] AS [p]", RdbsHelper.RdbsTablePre);
 
             if (onlyStock == 1)
-                commandText.AppendFormat(" LEFT JOIN [{0}productstocks] AS [ps] ON [p].[pid]=[ps].[pid]", RDBSHelper.RDBSTablePre);
+                commandText.AppendFormat(" LEFT JOIN [{0}productstocks] AS [ps] ON [p].[pid]=[ps].[pid]", RdbsHelper.RdbsTablePre);
 
-            commandText.AppendFormat(" LEFT JOIN [{0}productkeywords] AS [pk] ON [p].[pid]=[pk].[pid]", RDBSHelper.RDBSTablePre);
+            commandText.AppendFormat(" LEFT JOIN [{0}productkeywords] AS [pk] ON [p].[pid]=[pk].[pid]", RdbsHelper.RdbsTablePre);
 
             commandText.AppendFormat(" WHERE [p].[cateid]={0}", cateId);
 
@@ -282,9 +283,9 @@ namespace BrnShop.SearchStrategy.SqlServer
                 for (int i = 0; i < attrValueIdList.Count; i++)
                 {
                     if (i == 0)
-                        commandText.AppendFormat(" (SELECT [pid] FROM [{0}productattributes] WHERE [attrvalueid]={1}) AS [pa1]", RDBSHelper.RDBSTablePre, attrValueIdList[i]);
+                        commandText.AppendFormat(" (SELECT [pid] FROM [{0}productattributes] WHERE [attrvalueid]={1}) AS [pa1]", RdbsHelper.RdbsTablePre, attrValueIdList[i]);
                     else
-                        commandText.AppendFormat(" INNER JOIN (SELECT [pid] FROM [{0}productattributes] WHERE [attrvalueid]={1}) AS [pa{2}] ON [pa{2}].[pid]=[pa{3}].[pid]", RDBSHelper.RDBSTablePre, attrValueIdList[i], i + 1, i);
+                        commandText.AppendFormat(" INNER JOIN (SELECT [pid] FROM [{0}productattributes] WHERE [attrvalueid]={1}) AS [pa{2}] ON [pa{2}].[pid]=[pa{3}].[pid]", RdbsHelper.RdbsTablePre, attrValueIdList[i], i + 1, i);
                 }
                 commandText.Append(")");
             }
@@ -294,7 +295,7 @@ namespace BrnShop.SearchStrategy.SqlServer
 
             commandText.AppendFormat(" AND [pk].[keyword]='{0}'", keyword);
 
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText.ToString()));
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText.ToString()));
         }
 
         /// <summary>
@@ -309,8 +310,8 @@ namespace BrnShop.SearchStrategy.SqlServer
                                    };
 
             List<CategoryInfo> categoryList = new List<CategoryInfo>();
-            IDataReader reader = RDBSHelper.ExecuteReader(CommandType.StoredProcedure,
-                                                          string.Format("{0}getcategorylistbykeyword", RDBSHelper.RDBSTablePre),
+            IDataReader reader = RdbsHelper.ExecuteReader(CommandType.StoredProcedure,
+                                                          string.Format("{0}getcategorylistbykeyword", RdbsHelper.RdbsTablePre),
                                                           parms);
             while (reader.Read())
             {
@@ -345,8 +346,8 @@ namespace BrnShop.SearchStrategy.SqlServer
                                    };
 
             List<BrandInfo> brandList = new List<BrandInfo>();
-            IDataReader reader = RDBSHelper.ExecuteReader(CommandType.StoredProcedure,
-                                                          string.Format("{0}getcategorybrandlistbykeyword", RDBSHelper.RDBSTablePre),
+            IDataReader reader = RdbsHelper.ExecuteReader(CommandType.StoredProcedure,
+                                                          string.Format("{0}getcategorybrandlistbykeyword", RdbsHelper.RdbsTablePre),
                                                           parms);
             while (reader.Read())
             {

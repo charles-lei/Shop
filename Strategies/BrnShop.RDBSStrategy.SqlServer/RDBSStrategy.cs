@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Data.SqlClient;
 
 using BrnShop.Core;
+using BrnShop.Core.Data.RDBS;
 
 namespace BrnShop.RDBSStrategy.SqlServer
 {
@@ -88,7 +89,7 @@ namespace BrnShop.RDBSStrategy.SqlServer
         {
             if (!string.IsNullOrWhiteSpace(sql))
             {
-                SqlConnection conn = new SqlConnection(RDBSHelper.ConnectionString);
+                SqlConnection conn = new SqlConnection(RdbsHelper.ConnectionString);
                 conn.Open();
                 using (SqlTransaction trans = conn.BeginTransaction())
                 {
@@ -99,7 +100,7 @@ namespace BrnShop.RDBSStrategy.SqlServer
                         {
                             try
                             {
-                                RDBSHelper.ExecuteNonQuery(CommandType.Text, item);
+                                RdbsHelper.ExecuteNonQuery(CommandType.Text, item);
                                 trans.Commit();
                             }
                             catch (Exception ex)

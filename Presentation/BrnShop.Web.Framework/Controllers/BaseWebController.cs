@@ -5,6 +5,7 @@ using System.Web.Routing;
 using System.Collections.Generic;
 
 using BrnShop.Core;
+using BrnShop.Core.Data.RDBS;
 using BrnShop.Services;
 
 namespace BrnShop.Web.Framework
@@ -207,9 +208,9 @@ namespace BrnShop.Web.Framework
                 return;
 #if DEBUG
             //清空执行的sql语句数目
-            RDBSHelper.ExecuteCount = 0;
+            RdbsHelper.ExecuteCount = 0;
             //清空执行的sql语句细节
-            RDBSHelper.ExecuteDetail = string.Empty;
+            RdbsHelper.ExecuteDetail = string.Empty;
 #endif
             //页面开始执行时间
             WorkContext.StartExecuteTime = DateTime.Now;
@@ -232,13 +233,13 @@ namespace BrnShop.Web.Framework
                 return;
 #if DEBUG
             //执行的sql语句数目
-            WorkContext.ExecuteCount = RDBSHelper.ExecuteCount;
+            WorkContext.ExecuteCount = RdbsHelper.ExecuteCount;
 
             //执行的sql语句细节
-            if (RDBSHelper.ExecuteDetail == string.Empty)
+            if (RdbsHelper.ExecuteDetail == string.Empty)
                 WorkContext.ExecuteDetail = "<div style=\"display:block;clear:both;text-align:center;width:100%;margin:5px 0px;\">当前页面没有和数据库的任何交互</div>";
             else
-                WorkContext.ExecuteDetail = "<div style=\"display:block;clear:both;text-align:center;width:100%;margin:5px 0px;\">数据查询分析:</div>" + RDBSHelper.ExecuteDetail;
+                WorkContext.ExecuteDetail = "<div style=\"display:block;clear:both;text-align:center;width:100%;margin:5px 0px;\">数据查询分析:</div>" + RdbsHelper.ExecuteDetail;
 #endif
             //页面执行时间
             WorkContext.ExecuteTime = DateTime.Now.Subtract(WorkContext.StartExecuteTime).TotalMilliseconds / 1000;

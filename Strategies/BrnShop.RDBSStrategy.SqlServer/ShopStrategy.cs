@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 
 using BrnShop.Core;
+using BrnShop.Core.Data.RDBS;
 
 namespace BrnShop.RDBSStrategy.SqlServer
 {
@@ -130,12 +131,12 @@ namespace BrnShop.RDBSStrategy.SqlServer
 									GenerateInParam("@count",SqlDbType.Int,4, count)
 			                       };
             string commandText = string.Format("UPDATE [{0}pvstats] SET [count]=[count]+@count WHERE [category]=@category AND [value]=@value",
-                                                RDBSHelper.RDBSTablePre);
-            if (RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms) < 1)
+                                                RdbsHelper.RdbsTablePre);
+            if (RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms) < 1)
             {
                 commandText = string.Format("INSERT INTO [{0}pvstats]([category],[value],[count]) VALUES(@category, @value, @count)",
-                                             RDBSHelper.RDBSTablePre);
-                RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                             RdbsHelper.RdbsTablePre);
+                RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
             }
         }
 
@@ -146,8 +147,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public DataTable GetProvinceRegionStat()
         {
             string commandText = string.Format("SELECT [temp3].[provinceid],[temp4].[name] AS [provincename],[temp3].[totalcount] FROM (SELECT [temp2].[parentid] AS [provinceid],SUM([temp1].[count]) AS [totalcount] FROM (SELECT [category],[value],[count] FROM [{0}pvstats] WHERE [category]='region') AS [temp1] LEFT JOIN [{0}regions] AS [temp2] ON [temp1].[value]=[temp2].[regionid] GROUP BY [temp2].[parentid]) AS [temp3] LEFT JOIN [{0}regions] AS [temp4] ON [temp4].[regionid]=[temp3].[provinceid]",
-                                                RDBSHelper.RDBSTablePre);
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
+                                                RdbsHelper.RdbsTablePre);
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
         }
 
         /// <summary>
@@ -158,9 +159,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public DataTable GetCityRegionStat(int provinceId)
         {
             string commandText = string.Format("SELECT [temp3].[provinceid],[temp4].[provincename],[temp3].[totalcount] FROM (SELECT [temp2].[provinceid],SUM([temp1].[count]) AS [totalcount] FROM (SELECT [category],[value],[count] FROM [{0}pvstats] WHERE [category]='region') AS [temp1] LEFT JOIN [{0}regions] AS [temp2] ON [temp1].[value]=[temp2].[regionid] WHERE [temp2].[parentid]={1} GROUP BY [temp2].[provinceid]) AS [temp3] LEFT JOIN [{0}regions] AS [temp4] ON [temp4].[regionid]=[temp3].[provinceid]",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 provinceId);
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
         }
 
         /// <summary>
@@ -171,9 +172,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public DataTable GetCountyRegionStat(int cityId)
         {
             string commandText = string.Format("SELECT [temp3].[provinceid],[temp4].[provincename],[temp3].[totalcount] FROM (SELECT [temp2].[provinceid],SUM([temp1].[count]) AS [totalcount] FROM (SELECT [category],[value],[count] FROM [{0}pvstats] WHERE [category]='region') AS [temp1] LEFT JOIN [{0}regions] AS [temp2] ON [temp1].[value]=[temp2].[regionid] WHERE [temp2].[parentid]={1} GROUP BY [temp2].[provinceid]) AS [temp3] LEFT JOIN [{0}regions] AS [temp4] ON [temp4].[regionid]=[temp3].[provinceid]",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 cityId);
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
         }
 
         /// <summary>
@@ -184,10 +185,10 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public IDataReader GetPVStatList(string condition)
         {
             string commandText = string.Format("SELECT {1} FROM [{0}pvstats] WHERE {2}",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.PVSTATS,
                                                 condition);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText);
         }
 
         /// <summary>
@@ -203,9 +204,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
 									GenerateInParam("@value",SqlDbType.Char,20, value)
 			                       };
             string commandText = string.Format("SELECT {1} FROM [{0}pvstats] WHERE [category]=@category AND [value]=@value",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.PVSTATS);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText, parms);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText, parms);
         }
 
         #endregion
@@ -222,8 +223,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
 									GenerateInParam("@nowtime",SqlDbType.DateTime,8, DateTime.Now)
 			                       };
             string commandText = string.Format("SELECT [ip] FROM [{0}bannedips] WHERE [liftbantime]>@nowtime",
-                                                RDBSHelper.RDBSTablePre);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -237,9 +238,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                      GenerateInParam("@id", SqlDbType.Int, 4, id)
                                    };
             string commandText = string.Format("SELECT {1} FROM [{0}bannedips] WHERE [id]=@id",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.BANNEDIPS);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText, parms);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -250,9 +251,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public int GetBannedIPIdByIP(string ip)
         {
             string commandText = string.Format("SELECT TOP 1 [id] FROM [{0}bannedips] WHERE [ip] LIKE '{1}%'",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 ip);
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText), -1);
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText), -1);
         }
 
         /// <summary>
@@ -265,8 +266,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
 									GenerateInParam("@liftbantime",SqlDbType.DateTime,8, bannedIPInfo.LiftBanTime)
 			                       };
             string commandText = string.Format("INSERT INTO [{0}bannedips]([ip],[liftbantime]) VALUES(@ip,@liftbantime)",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -280,8 +281,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
 									GenerateInParam("@id",SqlDbType.Int,4, bannedIPInfo.Id)
 			                       };
             string commandText = string.Format("UPDATE [{0}bannedips] SET [ip]=@ip,[liftbantime]=@liftbantime WHERE [id]=@id",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -291,9 +292,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public void DeleteBannedIPById(string idList)
         {
             string commandText = String.Format("DELETE FROM [{0}bannedips] WHERE [id] IN ({1})",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 idList);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText);
         }
 
         /// <summary>
@@ -312,14 +313,14 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (string.IsNullOrWhiteSpace(ip))
                     commandText = string.Format("SELECT TOP {0} {2} FROM [{1}bannedips] ORDER BY {3}",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.BANNEDIPS,
                                                 sort);
 
                 else
                     commandText = string.Format("SELECT TOP {0} {3} FROM [{1}bannedips] WHERE [ip] LIKE '{2}%' ORDER BY {4}",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 ip,
                                                 RDBSFields.BANNEDIPS,
                                                 sort);
@@ -329,21 +330,21 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (string.IsNullOrWhiteSpace(ip))
                     commandText = string.Format("SELECT TOP {0} {3} FROM [{1}bannedips] WHERE [id] NOT IN (SELECT TOP {2} [id] FROM [{1}bannedips] ORDER BY {4}) ORDER BY {4}",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 (pageNumber - 1) * pageSize,
                                                 RDBSFields.BANNEDIPS,
                                                 sort);
                 else
                     commandText = string.Format("SELECT TOP {0} {4} FROM [{1}bannedips] WHERE [id] NOT IN (SELECT TOP {2} [id] FROM [{1}bannedips] WHERE [ip] LIKE '{3}%' ORDER BY {5}) AND [ip] LIKE '{3}%' ORDER BY {5}",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 (pageNumber - 1) * pageSize,
                                                 ip,
                                                 RDBSFields.BANNEDIPS,
                                                 sort);
             }
 
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
         }
 
         /// <summary>
@@ -371,11 +372,11 @@ namespace BrnShop.RDBSStrategy.SqlServer
         {
             string commandText;
             if (string.IsNullOrWhiteSpace(ip))
-                commandText = string.Format("SELECT COUNT([id]) FROM [{0}bannedips]", RDBSHelper.RDBSTablePre);
+                commandText = string.Format("SELECT COUNT([id]) FROM [{0}bannedips]", RdbsHelper.RdbsTablePre);
             else
-                commandText = string.Format("SELECT COUNT([id]) FROM [{0}bannedips] WHERE [ip] LIKE '{1}%'", RDBSHelper.RDBSTablePre, ip);
+                commandText = string.Format("SELECT COUNT([id]) FROM [{0}bannedips] WHERE [ip] LIKE '{1}%'", RdbsHelper.RdbsTablePre, ip);
 
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText));
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText));
         }
 
         #endregion
@@ -389,9 +390,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public IDataReader GetFilterWordList()
         {
             string commandText = string.Format("SELECT {1} FROM [{0}filterwords]",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.FILTERWORDS);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText);
         }
 
         /// <summary>
@@ -404,8 +405,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@replace", SqlDbType.NVarChar, 250, filterWordInfo.Replace)
                                    };
             string commandText = string.Format("INSERT INTO [{0}filterwords]([match],[replace]) VALUES(@match,@replace)",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -419,8 +420,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@id", SqlDbType.Int, 4, filterWordInfo.Id)
                                    };
             string commandText = string.Format("UPDATE [{0}filterwords] SET [match]=@match,[replace]=@replace WHERE [id]=@id",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -430,9 +431,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public void DeleteFilterWordById(string idList)
         {
             string commandText = string.Format("DELETE FROM [{0}filterwords] WHERE [id] IN ({1}) ",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 idList);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText);
         }
 
         #endregion
@@ -449,8 +450,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
             DbParameter[] parms = {
 									GenerateInParam("@loginip",SqlDbType.BigInt,8, loginIP)
 			                      };
-            return RDBSHelper.ExecuteReader(CommandType.StoredProcedure,
-                                            string.Format("{0}getloginfaillogbyip", RDBSHelper.RDBSTablePre),
+            return RdbsHelper.ExecuteReader(CommandType.StoredProcedure,
+                                            string.Format("{0}getloginfaillogbyip", RdbsHelper.RdbsTablePre),
                                             parms);
         }
 
@@ -466,12 +467,12 @@ namespace BrnShop.RDBSStrategy.SqlServer
 									GenerateInParam("@lastlogintime",SqlDbType.DateTime,8, loginTime)
 			                        };
             string commandText = string.Format("UPDATE [{0}loginfaillogs] SET [failtimes]=[failtimes]+1,[lastlogintime]=@lastlogintime WHERE [loginip]=@loginip",
-                                                RDBSHelper.RDBSTablePre);
-            if (RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms) < 1)
+                                                RdbsHelper.RdbsTablePre);
+            if (RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms) < 1)
             {
                 commandText = string.Format("INSERT INTO [{0}loginfaillogs]([loginip],[failtimes],[lastlogintime]) VALUES(@loginip,1,@lastlogintime)",
-                                             RDBSHelper.RDBSTablePre);
-                RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                             RdbsHelper.RdbsTablePre);
+                RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
             }
         }
 
@@ -484,8 +485,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
             DbParameter[] parms = {
 									GenerateInParam("@loginip",SqlDbType.BigInt,8, loginIP)
 			                       };
-            RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                       string.Format("{0}deleteloginfaillogbyip", RDBSHelper.RDBSTablePre),
+            RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                       string.Format("{0}deleteloginfaillogbyip", RdbsHelper.RdbsTablePre),
                                        parms);
         }
 
@@ -509,8 +510,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                         GenerateInParam("@operatetime", SqlDbType.DateTime, 8, adminOperateLogInfo.OperateTime)
                                     };
             string commandText = string.Format("INSERT INTO [{0}adminoperatelogs]([uid],[nickname],[admingid],[admingtitle],[operation],[description],[ip],[operatetime]) VALUES(@uid,@nickname,@admingid,@admingtitle,@operation,@description,@ip,@operatetime)",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -529,13 +530,13 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (noCondition)
                     commandText = string.Format("SELECT TOP {0} {2} FROM [{1}adminoperatelogs] ORDER BY [logid] DESC",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.ADMIN_OPERATELOGS);
 
                 else
                     commandText = string.Format("SELECT TOP {0} {3} FROM [{1}adminoperatelogs] WHERE {2} ORDER BY [logid] DESC",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 condition,
                                                 RDBSFields.ADMIN_OPERATELOGS);
             }
@@ -544,19 +545,19 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (noCondition)
                     commandText = string.Format("SELECT TOP {0} {3} FROM [{1}adminoperatelogs] WHERE [logid] < (SELECT MIN([logid]) FROM (SELECT TOP {2} [logid] FROM [{1}adminoperatelogs] ORDER BY [logid] DESC) AS [temp]) ORDER BY [logid] DESC",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 (pageNumber - 1) * pageSize,
                                                 RDBSFields.ADMIN_OPERATELOGS);
                 else
                     commandText = string.Format("SELECT TOP {0} {4} FROM [{1}adminoperatelogs] WHERE [logid] < (SELECT MIN([logid]) FROM (SELECT TOP {2} [logid] FROM [{1}adminoperatelogs] WHERE {3} ORDER BY [logid] DESC) AS [temp]) AND {3} ORDER BY [logid] DESC",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 (pageNumber - 1) * pageSize,
                                                 condition,
                                                 RDBSFields.ADMIN_OPERATELOGS);
             }
 
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText);
         }
 
         /// <summary>
@@ -591,11 +592,11 @@ namespace BrnShop.RDBSStrategy.SqlServer
         {
             string commandText;
             if (string.IsNullOrWhiteSpace(condition))
-                commandText = string.Format("SELECT COUNT(logid) FROM [{0}adminoperatelogs]", RDBSHelper.RDBSTablePre);
+                commandText = string.Format("SELECT COUNT(logid) FROM [{0}adminoperatelogs]", RdbsHelper.RdbsTablePre);
             else
-                commandText = string.Format("SELECT COUNT(logid) FROM [{0}adminoperatelogs] WHERE {1}", RDBSHelper.RDBSTablePre, condition);
+                commandText = string.Format("SELECT COUNT(logid) FROM [{0}adminoperatelogs] WHERE {1}", RdbsHelper.RdbsTablePre, condition);
 
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText), 0);
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText), 0);
         }
 
         /// <summary>
@@ -605,9 +606,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public void DeleteAdminOperateLogById(string logIdList)
         {
             string commandText = string.Format("DELETE FROM [{0}adminoperatelogs] WHERE [logid] IN ({1}) ",
-                                               RDBSHelper.RDBSTablePre,
+                                               RdbsHelper.RdbsTablePre,
                                                logIdList);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText);
         }
 
         #endregion
@@ -621,9 +622,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public IDataReader GetNavList()
         {
             string commandText = string.Format("SELECT {1} FROM [{0}navs] ORDER BY [displayorder] DESC",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.NAVS);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText);
         }
 
         /// <summary>
@@ -641,8 +642,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                          GenerateInParam("@displayorder",SqlDbType.Int,4,navInfo.DisplayOrder)
                                        };
             string commandText = String.Format("INSERT INTO [{0}navs]([pid],[layer],[name],[title],[url],[target],[displayorder]) VALUES(@pid,@layer,@name,@title,@url,@target,@displayorder)",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -655,8 +656,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@id",SqlDbType.Int, 4, id)
                                    };
             string commandText = String.Format("DELETE FROM [{0}navs] WHERE [id]=@id",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -675,8 +676,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                          GenerateInParam("@id",SqlDbType.Int, 4, navInfo.Id)
                                        };
             string commandText = String.Format("UPDATE [{0}navs] SET [pid]=@pid,[layer]=@layer,[name]=@name,[title]=@title,[url]=@url,[target]=@target,[displayorder]=@displayorder WHERE [id]=@id",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
         }
 
         #endregion
@@ -696,9 +697,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@nowtime",SqlDbType.DateTime,8,nowTime)
                                    };
             string commandText = string.Format("SELECT {1} FROM [{0}banners] WHERE [type]=@type AND [starttime]<=@nowtime AND [endtime]>@nowtime AND [isshow]=1 ORDER BY [displayorder] DESC,[id] DESC",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.BANNERS);
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText, param).Tables[0];
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText, param).Tables[0];
         }
 
         /// <summary>
@@ -714,7 +715,7 @@ namespace BrnShop.RDBSStrategy.SqlServer
             {
                 commandText = string.Format("SELECT TOP {0} {2} FROM [{1}banners] ORDER BY [type] ASC,[displayorder] DESC,[id] DESC",
                                             pageSize,
-                                            RDBSHelper.RDBSTablePre,
+                                            RdbsHelper.RdbsTablePre,
                                             RDBSFields.BANNERS);
 
             }
@@ -722,12 +723,12 @@ namespace BrnShop.RDBSStrategy.SqlServer
             {
                 commandText = string.Format("SELECT TOP {0} {3} FROM [{1}banners] WHERE [id] NOT IN (SELECT TOP {2} [id] FROM [{1}banners] ORDER BY [type] ASC,[displayorder] DESC,[id] DESC) ORDER BY [type] ASC,[displayorder] DESC,[id] DESC",
                                             pageSize,
-                                            RDBSHelper.RDBSTablePre,
+                                            RdbsHelper.RdbsTablePre,
                                             (pageNumber - 1) * pageSize,
                                             RDBSFields.BANNERS);
             }
 
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText);
         }
 
         /// <summary>
@@ -736,8 +737,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
         /// <returns></returns>
         public int AdminGetBannerCount()
         {
-            string commandText = string.Format("SELECT COUNT(id) FROM [{0}banners]", RDBSHelper.RDBSTablePre);
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText));
+            string commandText = string.Format("SELECT COUNT(id) FROM [{0}banners]", RdbsHelper.RdbsTablePre);
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText));
         }
 
         /// <summary>
@@ -751,9 +752,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@id",SqlDbType.Int,4,id)
                                    };
             string commandText = String.Format("SELECT {1} FROM [{0}banners] WHERE [id]=@id",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.BANNERS);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText, param);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -772,8 +773,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@displayorder",SqlDbType.Int,4,bannerInfo.DisplayOrder)
                                    };
             string commandText = String.Format("INSERT INTO [{0}banners]([type],[starttime],[endtime],[isshow],[title],[img],[url],[displayorder]) VALUES(@type,@starttime,@endtime,@isshow,@title,@img,@url,@displayorder)",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -793,8 +794,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@id",SqlDbType.Int, 4, bannerInfo.Id)
                                   };
             string commandText = String.Format("UPDATE [{0}banners] SET [type]=@type,[starttime]=@starttime,[endtime]=@endtime,[isshow]=@isshow,[title]=@title,[img]=@img,[url]=@url,[displayorder]=@displayorder WHERE [id]=@id",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -804,9 +805,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public void DeleteBannerById(string idList)
         {
             string commandText = String.Format("DELETE FROM [{0}banners] WHERE [id] IN ({1})",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 idList);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText);
         }
 
         #endregion
@@ -825,20 +826,20 @@ namespace BrnShop.RDBSStrategy.SqlServer
             if (pageNumber == 1)
             {
                 commandText = string.Format("SELECT TOP {2} {1} FROM [{0}advertpositions] ORDER BY [adposid] DESC",
-                                             RDBSHelper.RDBSTablePre,
+                                             RdbsHelper.RdbsTablePre,
                                              RDBSFields.ADVERT_POSITIONS,
                                              pageSize);
             }
             else
             {
                 commandText = string.Format("SELECT TOP {2} {1} FROM [{0}advertpositions] WHERE [adposid] < (SELECT MIN([adposid]) FROM (SELECT TOP {3} [adposid] FROM [{0}advertpositions] ORDER BY [adposid] DESC) AS [temp]) ORDER BY [adposid] DESC",
-                                             RDBSHelper.RDBSTablePre,
+                                             RdbsHelper.RdbsTablePre,
                                              RDBSFields.ADVERT_POSITIONS,
                                              pageSize,
                                              (pageNumber - 1) * pageSize);
             }
 
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText);
         }
 
         /// <summary>
@@ -847,8 +848,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
         /// <returns></returns>
         public int GetAdvertPositionCount()
         {
-            string commandText = string.Format("SELECT COUNT(adposid) FROM [{0}advertpositions]", RDBSHelper.RDBSTablePre);
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText));
+            string commandText = string.Format("SELECT COUNT(adposid) FROM [{0}advertpositions]", RdbsHelper.RdbsTablePre);
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText));
         }
 
         /// <summary>
@@ -858,9 +859,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public IDataReader GetAllAdvertPosition()
         {
             string commandText = string.Format("SELECT {1} FROM [{0}advertpositions] ORDER BY [adposid] DESC",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.ADVERT_POSITIONS);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText);
         }
 
         /// <summary>
@@ -873,8 +874,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                      GenerateInParam("@description",SqlDbType.NChar, 150, advertPositionInfo.Description)
                                    };
             string commandText = String.Format("INSERT INTO [{0}advertpositions]([title],[description]) VALUES(@title,@description)",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -888,8 +889,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                      GenerateInParam("@adposid",SqlDbType.SmallInt, 2, advertPositionInfo.AdPosId)
                                    };
             string commandText = String.Format("UPDATE [{0}advertpositions] SET [title]=@title,[description]=@description WHERE [adposid]=@adposid",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -903,9 +904,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@adposid",SqlDbType.SmallInt, 2, adPosId)
                                    };
             string commandText = string.Format("SELECT {1} FROM [{0}advertpositions] WHERE [adposid]=@adposid",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.ADVERT_POSITIONS);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText, param);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -918,8 +919,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@adposid",SqlDbType.SmallInt, 2, adPosId)
                                    };
             string commandText = String.Format("DELETE FROM [{0}adverts] WHERE [adposid]=@adposid;DELETE FROM [{0}advertpositions] WHERE [adposid]=@adposid;",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
         }
 
         #endregion
@@ -949,8 +950,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                      GenerateInParam("@extfield5",SqlDbType.NVarChar, 500, advertInfo.ExtField5)
                                    };
             string commandText = String.Format("INSERT INTO [{0}adverts]([clickcount],[adposid],[state],[starttime],[endtime],[displayorder],[type],[title],[url],[body],[extfield1],[extfield2],[extfield3],[extfield4],[extfield5]) VALUES(@clickcount,@adposid,@state,@starttime,@endtime,@displayorder,@type,@title,@url,@body,@extfield1,@extfield2,@extfield3,@extfield4,@extfield5)",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -977,8 +978,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                      GenerateInParam("@adid",SqlDbType.Int, 4, advertInfo.AdId)
                                    };
             string commandText = String.Format("UPDATE [{0}adverts] SET [clickcount]=@clickcount,[adposid]=@adposid,[state]=@state,[starttime]=@starttime,[endtime]=@endtime,[displayorder]=@displayorder,[type]=@type,[title]=@title,[url]=@url,[body]=@body,[extfield1]=@extfield1,[extfield2]=@extfield2,[extfield3]=@extfield3,[extfield4]=@extfield4,[extfield5]=@extfield5 WHERE [adid]=@adid",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -991,8 +992,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                      GenerateInParam("@adid",SqlDbType.Int, 4, adId)
                                    };
             string commandText = String.Format("DELETE FROM [{0}adverts] WHERE [adid]=@adid",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -1006,9 +1007,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                      GenerateInParam("@adid",SqlDbType.Int, 4, adId)
                                    };
             string commandText = string.Format("SELECT {1} FROM [{0}adverts] WHERE [adid]=@adid",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.ADVERTS);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText, param);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -1026,12 +1027,12 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (adPosId < 1)
                     commandText = string.Format("SELECT [temp1].[adid],[temp1].[clickcount],[temp1].[adposid],[temp1].[type],[temp1].[title] AS [atitle],[temp1].[starttime],[temp1].[endtime],[temp1].[state],[temp1].[displayorder],[temp2].[title] AS [aptitle] FROM (SELECT TOP {0} [adid],[clickcount],[adposid],[type],[title],[starttime],[endtime],[state],[displayorder] FROM [{1}adverts] ORDER BY [adposid] DESC,[displayorder] DESC,[adid] DESC) AS [temp1] LEFT JOIN [{1}advertpositions] AS [temp2] ON [temp1].[adposid]=[temp2].[adposid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre);
+                                                RdbsHelper.RdbsTablePre);
 
                 else
                     commandText = string.Format("SELECT [temp1].[adid],[temp1].[clickcount],[temp1].[adposid],[temp1].[type],[temp1].[title] AS [atitle],[temp1].[starttime],[temp1].[endtime],[temp1].[state],[temp1].[displayorder],[temp2].[title] AS [aptitle] FROM (SELECT TOP {0} [adid],[clickcount],[adposid],[type],[title],[starttime],[endtime],[state],[displayorder] FROM [{1}adverts] WHERE [adposid]={2} ORDER BY [adposid] DESC,[displayorder] DESC,[adid] DESC) AS [temp1] LEFT JOIN [{1}advertpositions] AS [temp2] ON [temp1].[adposid]=[temp2].[adposid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 adPosId);
             }
             else
@@ -1039,17 +1040,17 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (adPosId < 1)
                     commandText = string.Format("SELECT [temp1].[adid],[temp1].[clickcount],[temp1].[adposid],[temp1].[type],[temp1].[title] AS [atitle],[temp1].[starttime],[temp1].[endtime],[temp1].[state],[temp1].[displayorder],[temp2].[title] AS [aptitle] FROM (SELECT TOP {0} [adid],[clickcount],[adposid],[type],[title],[starttime],[endtime],[state],[displayorder] FROM [{1}adverts] WHERE [adid] NOT IN (SELECT TOP {2} [adid] FROM [{1}adverts] ORDER BY [adposid] DESC,[displayorder] DESC,[adid] DESC) ORDER BY [adposid] DESC,[displayorder] DESC,[adid] DESC) AS [temp1] LEFT JOIN [{1}advertpositions] AS [temp2] ON [temp1].[adposid]=[temp2].[adposid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 (pageNumber - 1) * pageSize);
                 else
                     commandText = string.Format("SELECT [temp1].[adid],[temp1].[clickcount],[temp1].[adposid],[temp1].[type],[temp1].[title] AS [atitle],[temp1].[starttime],[temp1].[endtime],[temp1].[state],[temp1].[displayorder],[temp2].[title] AS [aptitle] FROM (SELECT TOP {0} [adid],[clickcount],[adposid],[type],[title],[starttime],[endtime],[state],[displayorder] FROM [{1}adverts] WHERE [adposid]={3} AND [adid] NOT IN (SELECT TOP {2} [adid] FROM [{1}adverts] WHERE [adposid]={3} ORDER BY [adposid] DESC,[displayorder] DESC,[adid] DESC) ORDER BY [adposid] DESC,[displayorder] DESC,[adid] DESC) AS [temp1] LEFT JOIN [{1}advertpositions] AS [temp2] ON [temp1].[adposid]=[temp2].[adposid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 (pageNumber - 1) * pageSize,
                                                 adPosId);
             }
 
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
         }
 
         /// <summary>
@@ -1061,11 +1062,11 @@ namespace BrnShop.RDBSStrategy.SqlServer
         {
             string commandText;
             if (adPosId < 1)
-                commandText = string.Format("SELECT COUNT(adid) FROM [{0}adverts]", RDBSHelper.RDBSTablePre);
+                commandText = string.Format("SELECT COUNT(adid) FROM [{0}adverts]", RdbsHelper.RdbsTablePre);
             else
-                commandText = string.Format("SELECT COUNT(adid) FROM [{0}adverts] WHERE [adposid]={1}", RDBSHelper.RDBSTablePre, adPosId);
+                commandText = string.Format("SELECT COUNT(adid) FROM [{0}adverts] WHERE [adposid]={1}", RdbsHelper.RdbsTablePre, adPosId);
 
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText));
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText));
         }
 
         /// <summary>
@@ -1082,8 +1083,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                    };
             string commandText = string.Format("SELECT {0} FROM [{1}adverts] WHERE [adposid]=@adposid AND [state]=1 AND [starttime]<=@nowtime AND [endtime]>@nowtime ORDER BY [displayorder] DESC,[adid] DESC",
                                                 RDBSFields.ADVERTS,
-                                                RDBSHelper.RDBSTablePre);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText, param);
         }
 
         #endregion
@@ -1100,8 +1101,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@displayorder", SqlDbType.Int,4,newsTypeInfo.DisplayOrder)
                                     };
             string commandText = string.Format("INSERT INTO [{0}newstypes]([name],[displayorder]) VALUES(@name,@displayorder)",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -1114,8 +1115,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@newstypeid", SqlDbType.SmallInt,2,newsTypeId)
                                    };
             string commandText = string.Format("DELETE FROM [{0}news] WHERE [newstypeid]=@newstypeid;DELETE FROM [{0}newstypes] WHERE [newstypeid]=@newstypeid;",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -1129,8 +1130,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@newstypeid", SqlDbType.SmallInt,2,newsTypeInfo.NewsTypeId)
                                     };
             string commandText = string.Format("UPDATE [{0}newstypes] SET [name]=@name,[displayorder]=@displayorder WHERE [newstypeid]=@newstypeid",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -1140,9 +1141,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public IDataReader GetNewsTypeList()
         {
             string commandText = string.Format("SELECT {1} FROM [{0}newstypes] ORDER BY [displayorder] DESC",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.NEWS_TYPES);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText);
         }
 
         #endregion
@@ -1166,8 +1167,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                         GenerateInParam("@body", SqlDbType.NText, 0, newsInfo.Body)
                                     };
             string commandText = string.Format("INSERT INTO [{0}news]([newstypeid],[isshow],[istop],[ishome],[displayorder],[addtime],[title],[url],[body]) VALUES(@newstypeid,@isshow,@istop,@ishome,@displayorder,@addtime,@title,@url,@body)",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -1177,9 +1178,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public void DeleteNewsById(string newsIdList)
         {
             string commandText = string.Format("DELETE FROM [{0}news] WHERE [newsid] IN ({1})",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 newsIdList);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText);
         }
 
         /// <summary>
@@ -1200,8 +1201,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                         GenerateInParam("@newsid", SqlDbType.Int, 4, newsInfo.NewsId),
                                     };
             string commandText = string.Format("UPDATE [{0}news] SET [newstypeid]=@newstypeid,[isshow]=@isshow,[istop]=@istop,[ishome]=@ishome,[displayorder]=@displayorder,[addtime]=@addtime,[title]=@title,[url]=@url,[body]=@body WHERE [newsid]=@newsid",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -1214,8 +1215,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
             DbParameter[] parms = {
                                     GenerateInParam("@newsid", SqlDbType.Int, 4, newsId)    
                                    };
-            return RDBSHelper.ExecuteReader(CommandType.StoredProcedure,
-                                            string.Format("{0}getnewsbyid", RDBSHelper.RDBSTablePre),
+            return RdbsHelper.ExecuteReader(CommandType.StoredProcedure,
+                                            string.Format("{0}getnewsbyid", RdbsHelper.RdbsTablePre),
                                             parms);
         }
 
@@ -1230,9 +1231,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@newsid", SqlDbType.Int, 4, newsId)    
                                    };
             string commandText = string.Format("SELECT {1} FROM [{0}news] WHERE [newsid]=@newsid",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.NEWS);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText, parms);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -1252,13 +1253,13 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (noCondition)
                     commandText = string.Format("SELECT [temp1].[newsid],[temp1].[newstypeid],[temp1].[isshow],[temp1].[istop],[temp1].[ishome],[temp1].[displayorder],[temp1].[addtime],[temp1].[title],[temp2].[name] FROM (SELECT TOP {0} [newsid],[newstypeid],[isshow],[istop],[ishome],[displayorder],[addtime],[title] FROM [{1}news] ORDER BY {2}) AS [temp1] LEFT JOIN [{1}newstypes] AS [temp2] ON [temp1].[newstypeid]=[temp2].[newstypeid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 sort);
 
                 else
                     commandText = string.Format("SELECT [temp1].[newsid],[temp1].[newstypeid],[temp1].[isshow],[temp1].[istop],[temp1].[ishome],[temp1].[displayorder],[temp1].[addtime],[temp1].[title],[temp2].[name] FROM (SELECT TOP {0} [newsid],[newstypeid],[isshow],[istop],[ishome],[displayorder],[addtime],[title] FROM [{1}news] WHERE {3} ORDER BY {2}) AS [temp1] LEFT JOIN [{1}newstypes] AS [temp2] ON [temp1].[newstypeid]=[temp2].[newstypeid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 sort,
                                                 condition);
             }
@@ -1267,19 +1268,19 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (noCondition)
                     commandText = string.Format("SELECT [temp1].[newsid],[temp1].[newstypeid],[temp1].[isshow],[temp1].[istop],[temp1].[ishome],[temp1].[displayorder],[temp1].[addtime],[temp1].[title],[temp2].[name] FROM (SELECT TOP {0} [newsid],[newstypeid],[isshow],[istop],[ishome],[displayorder],[addtime],[title] FROM [{1}news] WHERE [newsid] NOT IN (SELECT TOP {3} [newsid] FROM [{1}news] ORDER BY {2}) ORDER BY {2}) AS [temp1] LEFT JOIN [{1}newstypes] AS [temp2] ON [temp1].[newstypeid]=[temp2].[newstypeid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 sort,
                                                 (pageNumber - 1) * pageSize);
                 else
                     commandText = string.Format("SELECT [temp1].[newsid],[temp1].[newstypeid],[temp1].[isshow],[temp1].[istop],[temp1].[ishome],[temp1].[displayorder],[temp1].[addtime],[temp1].[title],[temp2].[name] FROM (SELECT TOP {0} [newsid],[newstypeid],[isshow],[istop],[ishome],[displayorder],[addtime],[title] FROM [{1}news] WHERE {4} AND [newsid] NOT IN (SELECT TOP {3} [newsid] FROM [{1}news] WHERE {4} ORDER BY {2}) ORDER BY {2}) AS [temp1] LEFT JOIN [{1}newstypes] AS [temp2] ON [temp1].[newstypeid]=[temp2].[newstypeid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 sort,
                                                 (pageNumber - 1) * pageSize,
                                                 condition);
             }
 
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
         }
 
         /// <summary>
@@ -1325,11 +1326,11 @@ namespace BrnShop.RDBSStrategy.SqlServer
         {
             string commandText;
             if (string.IsNullOrWhiteSpace(condition))
-                commandText = string.Format("SELECT COUNT(newsid) FROM [{0}news]", RDBSHelper.RDBSTablePre);
+                commandText = string.Format("SELECT COUNT(newsid) FROM [{0}news]", RdbsHelper.RdbsTablePre);
             else
-                commandText = string.Format("SELECT COUNT(newsid) FROM [{0}news] WHERE {1}", RDBSHelper.RDBSTablePre, condition);
+                commandText = string.Format("SELECT COUNT(newsid) FROM [{0}news] WHERE {1}", RdbsHelper.RdbsTablePre, condition);
 
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText), 0);
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText), 0);
         }
 
         /// <summary>
@@ -1343,8 +1344,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@title", SqlDbType.NVarChar, 100, title)    
                                    };
             string commandText = string.Format("SELECT [newsid] FROM [{0}news] WHERE [title]=@title",
-                                                RDBSHelper.RDBSTablePre);
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText, parms));
+                                                RdbsHelper.RdbsTablePre);
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText, parms));
         }
 
         /// <summary>
@@ -1357,10 +1358,10 @@ namespace BrnShop.RDBSStrategy.SqlServer
         {
             string commandText;
             if (newsTypeId == 0)
-                commandText = string.Format("SELECT [temp2].[name],[temp1].[newsid],[temp1].[newstypeid],[temp1].[addtime],[temp1].[title],[temp1].[url] FROM (SELECT TOP {1} [newsid],[newstypeid],[addtime],[title],[url] FROM [{0}news] WHERE [isshow]=1 AND [ishome]=1 ORDER BY [displayorder] DESC) AS [temp1] LEFT JOIN [{0}newstypes] AS [temp2] ON [temp1].[newstypeid]=[temp2].[newstypeid]", RDBSHelper.RDBSTablePre, count);
+                commandText = string.Format("SELECT [temp2].[name],[temp1].[newsid],[temp1].[newstypeid],[temp1].[addtime],[temp1].[title],[temp1].[url] FROM (SELECT TOP {1} [newsid],[newstypeid],[addtime],[title],[url] FROM [{0}news] WHERE [isshow]=1 AND [ishome]=1 ORDER BY [displayorder] DESC) AS [temp1] LEFT JOIN [{0}newstypes] AS [temp2] ON [temp1].[newstypeid]=[temp2].[newstypeid]", RdbsHelper.RdbsTablePre, count);
             else
-                commandText = string.Format("SELECT [temp2].[name],[temp1].[newsid],[temp1].[newstypeid],[temp1].[addtime],[temp1].[title],[temp1].[url] FROM (SELECT TOP {2} [newsid],[newstypeid],[addtime],[title],[url] FROM [{0}news] WHERE [newstypeid]={1} AND [isshow]=1 AND [ishome]=1 ORDER BY [displayorder] DESC) AS [temp1] LEFT JOIN [{0}newstypes] AS [temp2] ON [temp1].[newstypeid]=[temp2].[newstypeid]", RDBSHelper.RDBSTablePre, newsTypeId, count);
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
+                commandText = string.Format("SELECT [temp2].[name],[temp1].[newsid],[temp1].[newstypeid],[temp1].[addtime],[temp1].[title],[temp1].[url] FROM (SELECT TOP {2} [newsid],[newstypeid],[addtime],[title],[url] FROM [{0}news] WHERE [newstypeid]={1} AND [isshow]=1 AND [ishome]=1 ORDER BY [displayorder] DESC) AS [temp1] LEFT JOIN [{0}newstypes] AS [temp2] ON [temp1].[newstypeid]=[temp2].[newstypeid]", RdbsHelper.RdbsTablePre, newsTypeId, count);
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
         }
 
         /// <summary>
@@ -1395,8 +1396,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@pagenumber", SqlDbType.Int, 4, pageNumber),
                                     GenerateInParam("@condition", SqlDbType.NVarChar, 1000, condition)    
                                    };
-            return RDBSHelper.ExecuteDataset(CommandType.StoredProcedure,
-                                             string.Format("{0}getnewslist", RDBSHelper.RDBSTablePre),
+            return RdbsHelper.ExecuteDataset(CommandType.StoredProcedure,
+                                             string.Format("{0}getnewslist", RdbsHelper.RdbsTablePre),
                                              parms).Tables[0];
         }
 
@@ -1410,8 +1411,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
             DbParameter[] parms = {
                                     GenerateInParam("@condition", SqlDbType.NVarChar, 1000, condition)   
                                    };
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.StoredProcedure,
-                                                                   string.Format("{0}getnewscount", RDBSHelper.RDBSTablePre),
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.StoredProcedure,
+                                                                   string.Format("{0}getnewscount", RdbsHelper.RdbsTablePre),
                                                                    parms));
         }
 
@@ -1432,8 +1433,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                         GenerateInParam("@displayorder", SqlDbType.Int,4,helpInfo.DisplayOrder)
                                     };
             string commandText = string.Format("INSERT INTO [{0}helps]([pid],[title],[url],[description],[displayorder]) VALUES(@pid,@title,@url,@description,@displayorder)",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -1446,8 +1447,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                         GenerateInParam("@id", SqlDbType.Int, 4, id)    
                                     };
             string commandText = string.Format("DELETE FROM [{0}helps] WHERE [id]=@id",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -1465,8 +1466,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     };
 
             string commandText = string.Format("UPDATE [{0}helps] SET [pid]=@pid,[title]=@title,[url]=@url,[description]=@description,[displayorder]=@displayorder WHERE [id]=@id",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -1476,9 +1477,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public IDataReader GetHelpList()
         {
             string commandText = string.Format("SELECT {1} FROM [{0}helps] ORDER BY [displayorder] DESC",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.HELPS);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText);
         }
 
         /// <summary>
@@ -1494,8 +1495,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                         GenerateInParam("@displayorder", SqlDbType.Int,4,displayOrder)
                                     };
             string commandText = string.Format("UPDATE [{0}helps] SET [displayorder]=@displayorder WHERE [id]=@id",
-                                                RDBSHelper.RDBSTablePre);
-            return RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms) > 0;
+                                                RdbsHelper.RdbsTablePre);
+            return RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms) > 0;
         }
 
         #endregion
@@ -1508,9 +1509,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public DataTable GetFriendLinkList()
         {
             string commandText = string.Format("SELECT {1} FROM [{0}friendlinks] ORDER BY [displayorder] DESC",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.FRIENDLINKS);
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
         }
 
         /// <summary>
@@ -1527,8 +1528,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                          GenerateInParam("@displayorder",SqlDbType.Int,4,friendLinkInfo.DisplayOrder)
                                        };
             string commandText = String.Format("INSERT INTO [{0}friendlinks] ([name],[title],[logo],[url],[target],[displayorder]) VALUES(@name,@title,@logo,@url,@target,@displayorder)",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -1546,8 +1547,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                          GenerateInParam("@id",SqlDbType.Int, 4, friendLinkInfo.Id)
                                        };
             string commandText = String.Format("UPDATE [{0}friendlinks] SET [name]=@name,[title]=@title,[logo]=@logo,[url]=@url,[target]=@target,[displayorder]=@displayorder WHERE [id]=@id",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -1557,9 +1558,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public void DeleteFriendLinkById(string idList)
         {
             string commandText = String.Format("DELETE FROM [{0}friendlinks] WHERE [id] IN ({1})",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 idList);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText);
         }
 
         #endregion
@@ -1573,9 +1574,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
         public DataTable GetAllRegion()
         {
             string commandText = string.Format("SELECT {1} FROM [{0}regions] ORDER BY [displayorder] DESC",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.REGIONS);
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
         }
 
         /// <summary>
@@ -1589,9 +1590,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@parentid",SqlDbType.SmallInt, 2, parentId)
                                    };
             string commandText = string.Format("SELECT {1} FROM [{0}regions] WHERE [parentid]=@parentid ORDER BY [displayorder] DESC",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.REGIONS);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText, param);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -1605,9 +1606,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@regionid",SqlDbType.SmallInt, 2, regionId)
                                    };
             string commandText = string.Format("SELECT {1} FROM [{0}regions] WHERE [regionid]=@regionid",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.REGIONS);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText, param);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText, param);
         }
 
         /// <summary>
@@ -1623,9 +1624,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                     GenerateInParam("@layer",SqlDbType.TinyInt, 1, layer)
                                    };
             string commandText = string.Format("SELECT {1} FROM [{0}regions] WHERE [name]=@name AND [layer]=@layer",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.REGIONS);
-            return RDBSHelper.ExecuteReader(CommandType.Text, commandText, param);
+            return RdbsHelper.ExecuteReader(CommandType.Text, commandText, param);
         }
 
         #endregion
@@ -1648,13 +1649,13 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (noCondition)
                     commandText = string.Format("SELECT [temp1].[logid],[temp1].[uid],[temp1].[paycredits],[temp1].[rankcredits],[temp1].[action],[temp1].[actioncode],[temp1].[actiontime],[temp1].[actiondes],[temp1].[operator],[temp2].[username] AS [rusername],[temp3].[username] AS [ousername] FROM (SELECT TOP {0} {2} FROM [{1}creditlogs] ORDER BY [logid] DESC) AS [temp1] LEFT JOIN [{1}users] AS [temp2] ON [temp1].[uid]=[temp2].[uid] LEFT JOIN [{1}users] AS [temp3] ON [temp1].[operator]=[temp3].[uid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.CREDITLOGS);
 
                 else
                     commandText = string.Format("SELECT [temp1].[logid],[temp1].[uid],[temp1].[paycredits],[temp1].[rankcredits],[temp1].[action],[temp1].[actioncode],[temp1].[actiontime],[temp1].[actiondes],[temp1].[operator],[temp2].[username] AS [rusername],[temp3].[username] AS [ousername] FROM (SELECT TOP {0} {2} FROM [{1}creditlogs] WHERE [3] ORDER BY [logid] DESC) AS [temp1] LEFT JOIN [{1}users] AS [temp2] ON [temp1].[uid]=[temp2].[uid] LEFT JOIN [{1}users] AS [temp3] ON [temp1].[operator]=[temp3].[uid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.CREDITLOGS,
                                                 condition);
             }
@@ -1663,19 +1664,19 @@ namespace BrnShop.RDBSStrategy.SqlServer
                 if (noCondition)
                     commandText = string.Format("SELECT [temp1].[logid],[temp1].[uid],[temp1].[paycredits],[temp1].[rankcredits],[temp1].[action],[temp1].[actioncode],[temp1].[actiontime],[temp1].[actiondes],[temp1].[operator],[temp2].[username] AS [rusername],[temp3].[username] AS [ousername] FROM (SELECT TOP {0} {2} FROM [{1}creditlogs] WHERE [logid] < (SELECT MIN([logid]) FROM (SELECT TOP {3} [logid] FROM [{1}creditlogs] ORDER BY [logid] DESC) AS [t]) ORDER BY [logid] DESC) AS [temp1] LEFT JOIN [{1}users] AS [temp2] ON [temp1].[uid]=[temp2].[uid] LEFT JOIN [{1}users] AS [temp3] ON [temp1].[operator]=[temp3].[uid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.CREDITLOGS,
                                                 (pageNumber - 1) * pageSize);
                 else
                     commandText = string.Format("SELECT [temp1].[logid],[temp1].[uid],[temp1].[paycredits],[temp1].[rankcredits],[temp1].[action],[temp1].[actioncode],[temp1].[actiontime],[temp1].[actiondes],[temp1].[operator],[temp2].[username] AS [rusername],[temp3].[username] AS [ousername] FROM (SELECT TOP {0} {2} FROM [{1}creditlogs] WHERE [logid] < (SELECT MIN([logid]) FROM (SELECT TOP {3} [logid] FROM [{1}creditlogs] WHERE {4} ORDER BY [logid] DESC) AS [t]) AND {4} ORDER BY [logid] DESC) AS [temp1] LEFT JOIN [{1}users] AS [temp2] ON [temp1].[uid]=[temp2].[uid] LEFT JOIN [{1}users] AS [temp3] ON [temp1].[operator]=[temp3].[uid]",
                                                 pageSize,
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 RDBSFields.CREDITLOGS,
                                                 (pageNumber - 1) * pageSize,
                                                 condition);
             }
 
-            return RDBSHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
+            return RdbsHelper.ExecuteDataset(CommandType.Text, commandText).Tables[0];
         }
 
         /// <summary>
@@ -1708,11 +1709,11 @@ namespace BrnShop.RDBSStrategy.SqlServer
         {
             string commandText;
             if (string.IsNullOrWhiteSpace(condition))
-                commandText = string.Format("SELECT COUNT(logid) FROM [{0}creditlogs]", RDBSHelper.RDBSTablePre);
+                commandText = string.Format("SELECT COUNT(logid) FROM [{0}creditlogs]", RdbsHelper.RdbsTablePre);
             else
-                commandText = string.Format("SELECT COUNT(logid) FROM [{0}creditlogs] WHERE {1}", RDBSHelper.RDBSTablePre, condition);
+                commandText = string.Format("SELECT COUNT(logid) FROM [{0}creditlogs] WHERE {1}", RdbsHelper.RdbsTablePre, condition);
 
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText), 0);
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText), 0);
         }
 
         /// <summary>
@@ -1733,8 +1734,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                        GenerateInParam("@actiondes",SqlDbType.NVarChar,300,creditLogInfo.ActionDes),
 									   GenerateInParam("@operator",SqlDbType.Int,4,creditLogInfo.Operator)
 								   };
-            RDBSHelper.ExecuteNonQuery(CommandType.StoredProcedure,
-                                       string.Format("{0}sendcredits", RDBSHelper.RDBSTablePre),
+            RdbsHelper.ExecuteNonQuery(CommandType.StoredProcedure,
+                                       string.Format("{0}sendcredits", RdbsHelper.RdbsTablePre),
                                        parms);
         }
 
@@ -1750,8 +1751,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
 									   GenerateInParam("@uid",SqlDbType.Int,4,uid),
 									   GenerateInParam("@today",SqlDbType.DateTime,8,today.Date)
 								   };
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.StoredProcedure,
-                                                                   string.Format("{0}gettodaysendpaycredits", RDBSHelper.RDBSTablePre),
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.StoredProcedure,
+                                                                   string.Format("{0}gettodaysendpaycredits", RdbsHelper.RdbsTablePre),
                                                                    parms), 0);
         }
 
@@ -1768,8 +1769,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
 									   GenerateInParam("@today",SqlDbType.DateTime,8,today.Date)
 								   };
 
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.StoredProcedure,
-                                                                   string.Format("{0}gettodaysendrankcredits", RDBSHelper.RDBSTablePre),
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.StoredProcedure,
+                                                                   string.Format("{0}gettodaysendrankcredits", RdbsHelper.RdbsTablePre),
                                                                    parms), 0);
         }
 
@@ -1786,9 +1787,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
 									   GenerateInParam("@today",SqlDbType.DateTime,8,today.Date)
 								   };
             string commandText = string.Format("SELECT [logid] FROM [{0}creditlogs] WHERE [uid]=@uid AND [actiontime]>=@today AND [action]={1}",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 (int)CreditAction.Login);
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText, parms)) > 0;
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText, parms)) > 0;
         }
 
         /// <summary>
@@ -1802,9 +1803,9 @@ namespace BrnShop.RDBSStrategy.SqlServer
 									   GenerateInParam("@uid",SqlDbType.Int,4,uid)
 								   };
             string commandText = string.Format("SELECT [logid] FROM [{0}creditlogs] WHERE [uid]=@uid AND [action]={1}",
-                                                RDBSHelper.RDBSTablePre,
+                                                RdbsHelper.RdbsTablePre,
                                                 (int)CreditAction.CompleteUserInfo);
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.Text, commandText, parms)) > 0;
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.Text, commandText, parms)) > 0;
         }
 
         /// <summary>
@@ -1823,8 +1824,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
 									   GenerateInParam("@pagesize",SqlDbType.Int,4,pageSize),
 									   GenerateInParam("@pagenumber",SqlDbType.Int,4,pageNumber)
 								   };
-            return RDBSHelper.ExecuteReader(CommandType.StoredProcedure,
-                                            string.Format("{0}getpaycreditloglist", RDBSHelper.RDBSTablePre),
+            return RdbsHelper.ExecuteReader(CommandType.StoredProcedure,
+                                            string.Format("{0}getpaycreditloglist", RdbsHelper.RdbsTablePre),
                                             parms);
         }
 
@@ -1840,8 +1841,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
 									   GenerateInParam("@uid",SqlDbType.Int,4,uid),
 									   GenerateInParam("@type",SqlDbType.TinyInt,1,type)
 								   };
-            return TypeHelper.ObjectToInt(RDBSHelper.ExecuteScalar(CommandType.StoredProcedure,
-                                                                   string.Format("{0}getpaycreditlogcount", RDBSHelper.RDBSTablePre),
+            return TypeHelper.ObjectToInt(RdbsHelper.ExecuteScalar(CommandType.StoredProcedure,
+                                                                   string.Format("{0}getpaycreditlogcount", RdbsHelper.RdbsTablePre),
                                                                    parms));
         }
 
@@ -1855,8 +1856,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
             DbParameter[] parms = {
 									GenerateInParam("@oid",SqlDbType.Int,4,oid)
 								   };
-            return RDBSHelper.ExecuteDataset(CommandType.StoredProcedure,
-                                             string.Format("{0}getuserordersendcredits", RDBSHelper.RDBSTablePre),
+            return RdbsHelper.ExecuteDataset(CommandType.StoredProcedure,
+                                             string.Format("{0}getuserordersendcredits", RdbsHelper.RdbsTablePre),
                                              parms).Tables[0];
         }
 
@@ -1880,8 +1881,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
 									   GenerateInParam("@executetime",SqlDbType.DateTime,8,executeTime)
 								   };
             string commandText = string.Format("INSERT INTO [{0}eventlogs]([key],[title],[server],[executetime]) VALUES(@key,@title,@server,@executetime)",
-                                                RDBSHelper.RDBSTablePre);
-            RDBSHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
+                                                RdbsHelper.RdbsTablePre);
+            RdbsHelper.ExecuteNonQuery(CommandType.Text, commandText, parms);
         }
 
         /// <summary>
@@ -1895,8 +1896,8 @@ namespace BrnShop.RDBSStrategy.SqlServer
                                      GenerateInParam("@key", SqlDbType.NVarChar, 100, key)
                                    };
             string commandText = string.Format("SELECT TOP 1 [executetime] FROM [{0}eventlogs] WHERE [key]=@key ORDER BY [id] DESC",
-                                                RDBSHelper.RDBSTablePre);
-            return TypeHelper.ObjectToDateTime(RDBSHelper.ExecuteScalar(CommandType.Text, commandText, parms));
+                                                RdbsHelper.RdbsTablePre);
+            return TypeHelper.ObjectToDateTime(RdbsHelper.ExecuteScalar(CommandType.Text, commandText, parms));
         }
 
         #endregion

@@ -1,6 +1,7 @@
 ﻿using System;
 
 using BrnShop.Core;
+using BrnShop.Core.Data.RDBS;
 
 namespace BrnShop.Services
 {
@@ -25,7 +26,7 @@ namespace BrnShop.Services
         /// <returns></returns>
         public static string GetDBName()
         {
-            string[] itemList = StringHelper.SplitString(RDBSHelper.ConnectionString, ";");
+            string[] itemList = StringHelper.SplitString(RdbsHelper.ConnectionString, ";");
             foreach (string item in itemList)
             {
                 if (item.ToLower().Contains("initial catalog") || item.ToLower().Contains("database"))

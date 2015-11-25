@@ -3,62 +3,45 @@
 // For more information please go to 
 // http://msdn.microsoft.com/library/en-us/dnbda/html/daab-rm.asp
 //===============================================================================
+
 using System;
-using System.Text;
 using System.Data;
 using System.Data.Common;
+using System.Linq;
+using System.Text;
 
-namespace BrnShop.Core
+namespace BrnShop.Core.Data.RDBS
 {
     /// <summary>
     /// 关系数据库帮助类
     /// </summary>
-    public partial class RDBSHelper
+    public class RdbsHelper
     {
-        private static object _locker = new object();//锁对象
+        public static object Locker { get; } = new object();
 
-        private static DbProviderFactory _factory;//抽象数据工厂
-
-        private static string _rdbstablepre;//关系数据库对象前缀
-        private static string _connectionstring;//关系数据库连接字符串
+        private static readonly DbProviderFactory Factory;//抽象数据工厂
 
         /// <summary>
         /// 关系数据库对象前缀
         /// </summary>
-        public static string RDBSTablePre
-        {
-            get { return _rdbstablepre; }
-        }
+        public static string RdbsTablePre { get; }
 
         /// <summary>
         /// 关系数据库连接字符串
         /// </summary>
-        public static string ConnectionString
-        {
-            get { return _connectionstring; }
-        }
+        public static string ConnectionString { get; }
 
 #if DEBUG
-        private static int _executecount = 0;
-        private static string _executedetail = string.Empty;
 
         /// <summary>
         /// 数据库执行次数
         /// </summary>
-        public static int ExecuteCount
-        {
-            get { return _executecount; }
-            set { _executecount = value; }
-        }
+        public static int ExecuteCount { get; set; }
 
         /// <summary>
         /// 数据库执行细节
         /// </summary>
-        public static string ExecuteDetail
-        {
-            get { return _executedetail; }
-            set { _executedetail = value; }
-        }
+        public static string ExecuteDetail { get; set; } = string.Empty;
 
         /// <summary>
         /// 设置数据库执行细节
@@ -92,14 +75,14 @@ namespace BrnShop.Core
         }
 #endif
 
-        static RDBSHelper()
+        static RdbsHelper()
         {
             //设置数据工厂
-            _factory = BSPData.RDBS.GetDbProviderFactory();
+            Factory = BSPData.RDBS.GetDbProviderFactory();
             //设置关系数据库对象前缀
-            _rdbstablepre = BSPConfig.RDBSConfig.RDBSTablePre;
+            RdbsTablePre = BSPConfig.RDBSConfig.RDBSTablePre;
             //设置关系数据库连接字符串
-            _connectionstring = BSPConfig.RDBSConfig.RDBSConnectString;
+            ConnectionString = BSPConfig.RDBSConfig.RDBSConnectString;
         }
 
         #region ExecuteNonQuery
@@ -117,25 +100,32 @@ namespace BrnShop.Core
         public static int ExecuteNonQuery(CommandType cmdType, string cmdText, params DbParameter[] commandParameters)
         {
 #if DEBUG
-            _executecount++;
+            ExecuteCount++;
 #endif
-            DbCommand cmd = _factory.CreateCommand();
+            var cmd = Factory.CreateCommand();
 
-            using (DbConnection conn = _factory.CreateConnection())
+            using (var conn = Factory.CreateConnection())
             {
-                conn.ConnectionString = ConnectionString;
-                PrepareCommand(cmd, conn, null, cmdType, cmdText, commandParameters);
+                if (conn != null)
+                {
+                    conn.ConnectionString = ConnectionString;
+                    PrepareCommand(cmd, conn, null, cmdType, cmdText, commandParameters);
+                }
 #if DEBUG
-                DateTime startTime = DateTime.Now;
+                var startTime = DateTime.Now;
 #endif
-                int val = cmd.ExecuteNonQuery();
+                if (cmd != null)
+                {
+                    var val = cmd.ExecuteNonQuery();
 #if DEBUG
-                DateTime endTime = DateTime.Now;
-                _executedetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
+                    var endTime = DateTime.Now;
+                    ExecuteDetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
 #endif
-                cmd.Parameters.Clear();
-                return val;
+                    cmd.Parameters.Clear();
+                    return val;
+                }
             }
+            return 0;
         }
 
 
@@ -148,18 +138,19 @@ namespace BrnShop.Core
         public static int ExecuteNonQuery(DbTransaction trans, CommandType cmdType, string cmdText, params DbParameter[] commandParameters)
         {
 #if DEBUG
-            _executecount++;
+            ExecuteCount++;
 #endif
 
-            DbCommand cmd = _factory.CreateCommand();
+            var cmd = Factory.CreateCommand();
             PrepareCommand(cmd, trans.Connection, trans, cmdType, cmdText, commandParameters);
 #if DEBUG
-            DateTime startTime = DateTime.Now;
+            var startTime = DateTime.Now;
 #endif
-            int val = cmd.ExecuteNonQuery();
+            if (cmd == null) return 0;
+            var val = cmd.ExecuteNonQuery();
 #if DEBUG
-            DateTime endTime = DateTime.Now;
-            _executedetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
+            var endTime = DateTime.Now;
+            ExecuteDetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
 #endif
             cmd.Parameters.Clear();
             return val;
@@ -177,32 +168,39 @@ namespace BrnShop.Core
         public static DbDataReader ExecuteReader(CommandType cmdType, string cmdText, params DbParameter[] commandParameters)
         {
 #if DEBUG
-            _executecount++;
+            ExecuteCount++;
 #endif
 
-            DbCommand cmd = _factory.CreateCommand();
-            DbConnection conn = _factory.CreateConnection();
-            conn.ConnectionString = ConnectionString;
+            var cmd = Factory.CreateCommand();
+            var conn = Factory.CreateConnection();
+            if (conn != null)
+            {
+                conn.ConnectionString = ConnectionString;
 
-            try
-            {
-                PrepareCommand(cmd, conn, null, cmdType, cmdText, commandParameters);
+                try
+                {
+                    PrepareCommand(cmd, conn, null, cmdType, cmdText, commandParameters);
 #if DEBUG
-                DateTime startTime = DateTime.Now;
+                    var startTime = DateTime.Now;
 #endif
-                DbDataReader rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
+                    if (cmd != null)
+                    {
+                        var rdr = cmd.ExecuteReader(CommandBehavior.CloseConnection);
 #if DEBUG
-                DateTime endTime = DateTime.Now;
-                _executedetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
+                        var endTime = DateTime.Now;
+                        ExecuteDetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
 #endif
-                cmd.Parameters.Clear();
-                return rdr;
+                        cmd.Parameters.Clear();
+                        return rdr;
+                    }
+                }
+                catch
+                {
+                    conn.Close();
+                    throw;
+                }
             }
-            catch
-            {
-                conn.Close();
-                throw;
-            }
+            return null;
         }
 
 
@@ -215,23 +213,23 @@ namespace BrnShop.Core
         public static DbDataReader ExecuteReader(DbTransaction trans, CommandType cmdType, string cmdText, params DbParameter[] commandParameters)
         {
 #if DEBUG
-            _executecount++;
+            ExecuteCount++;
 #endif
 
-            DbCommand cmd = _factory.CreateCommand();
+            var cmd = Factory.CreateCommand();
 
             PrepareCommand(cmd, trans.Connection, trans, cmdType, cmdText, commandParameters);
 #if DEBUG
-            DateTime startTime = DateTime.Now;
+            var startTime = DateTime.Now;
 #endif
-            DbDataReader rdr = cmd.ExecuteReader();
+            if (cmd == null) return null;
+            var rdr = cmd.ExecuteReader();
 #if DEBUG
-            DateTime endTime = DateTime.Now;
-            _executedetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
+            var endTime = DateTime.Now;
+            ExecuteDetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
 #endif
             cmd.Parameters.Clear();
             return rdr;
-
         }
 
         #endregion
@@ -246,22 +244,26 @@ namespace BrnShop.Core
         public static object ExecuteScalar(CommandType cmdType, string cmdText, params DbParameter[] commandParameters)
         {
 #if DEBUG
-            _executecount++;
+            ExecuteCount++;
 #endif
 
-            DbCommand cmd = _factory.CreateCommand();
+            var cmd = Factory.CreateCommand();
 
-            using (DbConnection connection = _factory.CreateConnection())
+            using (var connection = Factory.CreateConnection())
             {
-                connection.ConnectionString = ConnectionString;
-                PrepareCommand(cmd, connection, null, cmdType, cmdText, commandParameters);
+                if (connection != null)
+                {
+                    connection.ConnectionString = ConnectionString;
+                    PrepareCommand(cmd, connection, null, cmdType, cmdText, commandParameters);
+                }
 #if DEBUG
-                DateTime startTime = DateTime.Now;
+                var startTime = DateTime.Now;
 #endif
-                object val = cmd.ExecuteScalar();
+                if (cmd == null) return null;
+                var val = cmd.ExecuteScalar();
 #if DEBUG
-                DateTime endTime = DateTime.Now;
-                _executedetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
+                var endTime = DateTime.Now;
+                ExecuteDetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
 #endif
                 cmd.Parameters.Clear();
                 return val;
@@ -278,18 +280,19 @@ namespace BrnShop.Core
         public static object ExecuteScalar(DbTransaction trans, CommandType cmdType, string cmdText, params DbParameter[] commandParameters)
         {
 #if DEBUG
-            _executecount++;
+            ExecuteCount++;
 #endif
 
-            DbCommand cmd = _factory.CreateCommand();
+            var cmd = Factory.CreateCommand();
             PrepareCommand(cmd, trans.Connection, trans, cmdType, cmdText, commandParameters);
 #if DEBUG
-            DateTime startTime = DateTime.Now;
+            var startTime = DateTime.Now;
 #endif
-            object val = cmd.ExecuteScalar();
+            if (cmd == null) return null;
+            var val = cmd.ExecuteScalar();
 #if DEBUG
-            DateTime endTime = DateTime.Now;
-            _executedetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
+            var endTime = DateTime.Now;
+            ExecuteDetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
 #endif
             cmd.Parameters.Clear();
             return val;
@@ -307,40 +310,44 @@ namespace BrnShop.Core
         public static DataSet ExecuteDataset(CommandType cmdType, string cmdText, params DbParameter[] commandParameters)
         {
 #if DEBUG
-            _executecount++;
+            ExecuteCount++;
 #endif
 
-            DbCommand cmd = _factory.CreateCommand();
-            DbConnection conn = _factory.CreateConnection();
-            conn.ConnectionString = ConnectionString;
-            DbDataAdapter adapter = _factory.CreateDataAdapter();
-
-            try
+            var cmd = Factory.CreateCommand();
+            var conn = Factory.CreateConnection();
+            if (conn != null)
             {
-                PrepareCommand(cmd, conn, null, cmdType, cmdText, commandParameters);
-                adapter.SelectCommand = cmd;
-                DataSet ds = new DataSet();
+                conn.ConnectionString = ConnectionString;
+                var adapter = Factory.CreateDataAdapter();
+
+                try
+                {
+                    PrepareCommand(cmd, conn, null, cmdType, cmdText, commandParameters);
+                    if (adapter != null)
+                    {
+                        adapter.SelectCommand = cmd;
+                        var ds = new DataSet();
 
 #if DEBUG
-                DateTime startTime = DateTime.Now;
+                        var startTime = DateTime.Now;
 #endif
-                adapter.Fill(ds);
+                        adapter.Fill(ds);
 #if DEBUG
-                DateTime endTime = DateTime.Now;
-                _executedetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
+                        var endTime = DateTime.Now;
+                        if (cmd == null) return ds;
+                        ExecuteDetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
 #endif
-                cmd.Parameters.Clear();
-                return ds;
+                        cmd.Parameters.Clear();
+                        return ds;
+                    }
+                }
+                finally
+                {
+                    adapter?.Dispose();
+                    conn.Close();
+                }
             }
-            catch
-            {
-                throw;
-            }
-            finally
-            {
-                adapter.Dispose();
-                conn.Close();
-            }
+            return new DataSet();
         }
 
 
@@ -353,26 +360,31 @@ namespace BrnShop.Core
         public static DataSet ExecuteDataset(DbTransaction trans, CommandType cmdType, string cmdText, params DbParameter[] commandParameters)
         {
 #if DEBUG
-            _executecount++;
+            ExecuteCount++;
 #endif
 
-            DbCommand cmd = _factory.CreateCommand();
-            DbDataAdapter adapter = _factory.CreateDataAdapter();
+            DbCommand cmd = Factory.CreateCommand();
+            DbDataAdapter adapter = Factory.CreateDataAdapter();
 
             PrepareCommand(cmd, trans.Connection, trans, cmdType, cmdText, commandParameters);
-            adapter.SelectCommand = cmd;
-            DataSet ds = new DataSet();
+            if (adapter != null)
+            {
+                adapter.SelectCommand = cmd;
+                var ds = new DataSet();
 
 #if DEBUG
-            DateTime startTime = DateTime.Now;
+                var startTime = DateTime.Now;
 #endif
-            adapter.Fill(ds);
+                adapter.Fill(ds);
 #if DEBUG
-            DateTime endTime = DateTime.Now;
-            _executedetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
+                var endTime = DateTime.Now;
+                if (cmd == null) return ds;
+                ExecuteDetail += GetExecuteDetail(cmd.CommandText, startTime, endTime, commandParameters);
 #endif
-            cmd.Parameters.Clear();
-            return ds;
+                cmd.Parameters.Clear();
+                return ds;
+            }
+            return new DataSet();
         }
 
         #endregion
@@ -391,20 +403,15 @@ namespace BrnShop.Core
 
             cmd.CommandType = cmdType;
 
-            if (cmdParms != null)
+            if (cmdParms == null) return;
+            foreach (var parm in cmdParms.Where(parm => parm != null))
             {
-                foreach (DbParameter parm in cmdParms)
+                if ((parm.Direction == ParameterDirection.InputOutput || parm.Direction == ParameterDirection.Input) &&
+                    (parm.Value == null))
                 {
-                    if (parm != null)
-                    {
-                        if ((parm.Direction == ParameterDirection.InputOutput || parm.Direction == ParameterDirection.Input) &&
-                            (parm.Value == null))
-                        {
-                            parm.Value = DBNull.Value;
-                        }
-                        cmd.Parameters.Add(parm);
-                    }
+                    parm.Value = DBNull.Value;
                 }
+                cmd.Parameters.Add(parm);
             }
         }
 
